@@ -708,8 +708,9 @@ run_registry() {
     generate_crt
     cp $TEST_COCO_PATH/../certs/domain.crt /usr/local/share/ca-certificates/${REGISTRY_NAME}.crt
 
-    update-ca-certificates
-
+    # update-ca-certificates
+    cat $TEST_COCO_PATH/../certs/domain.crt >> /etc/pki/ca-trust/source/anchors/${REGISTRY_NAME}.crt
+    update-ca-trust
     # Deploy docker registry
     docker run -d --restart=always --name $REGISTRY_NAME -v $TEST_COCO_PATH/../certs:/certs \
         -e REGISTRY_HTTP_ADDR=0.0.0.0:$PORT -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt \
