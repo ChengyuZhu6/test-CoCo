@@ -452,9 +452,9 @@ EOF
 
     export OCICRYPT_KEYPROVIDER_CONFIG=/etc/containerd/ocicrypt/ocicrypt_keyprovider.conf
 
-    skopeo --insecure-policy copy docker://${REGISTRY_NAME}/${IMAGE}:latest oci:$STORAGE_FILE_D/${IMAGE}
-    skopeo copy --insecure-policy --remove-signatures --encryption-key provider:attestation-agent:84688df7-2c0c-40fa-956b-29d8e74d16c0 oci:$STORAGE_FILE_D/${IMAGE} docker://${REGISTRY_NAME}/${IMAGE}:encrypted
-    rm -r $STORAGE_FILE_D/${IMAGE}
+    # skopeo --insecure-policy copy docker://${REGISTRY_NAME}/${IMAGE}:latest oci:$STORAGE_FILE_D/${IMAGE}
+    skopeo copy --insecure-policy --remove-signatures --encryption-key provider:attestation-agent:84688df7-2c0c-40fa-956b-29d8e74d16c0 docker://${REGISTRY_NAME}/${IMAGE}:latest docker://${REGISTRY_NAME}/${IMAGE}:encrypted
+    # rm -r $STORAGE_FILE_D/${IMAGE}
 
     # generate encrypted image
 
