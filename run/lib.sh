@@ -413,6 +413,7 @@ setup_http_proxy() {
         add_kernel_params "agent.https_proxy=$https_proxy"
     fi
 }
+
 generate_encrypted_image() {
     local IMAGE="$1"
     # Generate the key provider configuration file
@@ -514,8 +515,9 @@ setup_eaa_kbc_agent_config_in_guest() {
     # cat "${rootfs_agent_config}"
 }
 setup_eaa_decryption_files_in_guest() {
-
-    setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.239.159.53:50000"
+    add_kernel_params "agent.aa_kbc_params=eaa_kbc::10.112.240.208:50000"
+    # setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.239.159.53:50000"
+    # setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.112.240.208:50000"
 }
 setup_offline_decryption_files_in_guest() {
     add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
@@ -707,7 +709,9 @@ generate_crt() {
 12
 ESXU
 }
-
+get_certs_from_remote() {
+    echo "todo"
+}
 run_registry() {
     # delete all docker containers and images
     REGISTRY_CONTAINER=$(docker ps -a | grep "registry" | awk '{print $1}')
