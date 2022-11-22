@@ -122,7 +122,7 @@ Test_signed_image() {
 	done
 }
 Test_encrypted_image() {
-	
+
 	# generate_encrypted_image
 	# VERDICTDID=$(ps ux | grep "verdictd" | grep -v "grep" | awk '{print $2}')
 	# if [ "$VERDICTDID" == "" ]; then
@@ -131,15 +131,15 @@ Test_encrypted_image() {
 	# sleep 1
 	setup_eaa_decryption_files_in_guest
 	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
-	for IMAGE in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		pod_config="$(new_pod_config $TEST_COCO_PATH/../fixtures/k8s-cc-ssh.yaml.in "$IMAGE" "$RUNTIMECLASS" "$REGISTRY_NAME/$IMAGE:$VERSION")"
+	# for IMAGE in ${EXAMPLE_IMAGE_LISTS[@]}; do
+	pod_config=$TEST_COCO_PATH/../fixtures/encrypted_image-config.yaml
 
-		pull_encrypted_image_inside_guest_with_decryption_key $pod_config
-		rm $pod_config
-	done
-	VERDICTDID=$(ps ux | grep "verdictd " | grep -v "grep" | awk '{print $2}')
-	echo $VERDICTDID
-	kill -9 $VERDICTDID
+	pull_encrypted_image_inside_guest_with_decryption_key $pod_config
+	# rm $pod_config
+	# done
+	# VERDICTDID=$(ps ux | grep "verdictd " | grep -v "grep" | awk '{print $2}')
+	# echo $VERDICTDID
+	# kill -9 $VERDICTDID
 }
 
 Test_uninstall_operator() {
@@ -217,9 +217,9 @@ main() {
 	setup
 	read_config
 	# run_registry
-	remove_kernel_param "agent.enable_signature_verification"
+	# remove_kernel_param "agent.enable_signature_verification"
 	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
-	# Test_install_operator
+	Test_install_operator
 	# start_local_registry
 	# install_runtime
 	# read_config
@@ -227,8 +227,8 @@ main() {
 	# Test_measured_boot_image
 	# Test_cosign_image
 	# pull_image
-	Test_encrypted_image_offline
-	# Test_uninstall_operator
+	Test_encrypted_image
+	Test_uninstall_operator
 	# teardown
 }
 main "$@"

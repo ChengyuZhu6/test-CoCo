@@ -41,11 +41,11 @@
 	},
 	"certificates": {
 		"type": "DNS",
-		"registry": "zcy-Z390-AORUS-MASTER.sh.intel.com",
-		"nodeName": "zcy-z390-aorus-master",
+		"registry": "tdx-ci.sh.intel.com",
+		"nodeName": "tdx-ci",
 		"port": "443",
 		"imagePath": "./create_files",
-		"ip": "10.239.159.53",
+		"ip": "10.112.240.208",
 		"gpgEmail": "intel@intel.com"
 	}
 }

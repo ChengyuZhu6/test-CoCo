@@ -516,6 +516,7 @@ setup_eaa_kbc_agent_config_in_guest() {
 }
 setup_eaa_decryption_files_in_guest() {
     add_kernel_params "agent.aa_kbc_params=eaa_kbc::10.112.240.208:50000"
+    add_kernel_params "agent.https_proxy=http://child-prc.intel.com:913 agent.no_proxy=*.sh.intel.com,10.*"
     # setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.239.159.53:50000"
     # setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.112.240.208:50000"
 }

@@ -3,8 +3,8 @@ kind: Pod
 metadata:
   name: encrypted-cc
 spec:
-  runtimeClassName: kata-qemu
+  runtimeClassName: kata-qemu-tdx-eaa-kbc
   containers:
-  - name: $IMAGE
-    image:  $REGISTRTYIMAGE
+  - name: busybox
+    image:  docker.io/junruizh2021/busybox-encrypted-84688df7-2c0c-40fa-956b-29d8e74d16c0:latest
     imagePullPolicy: Always
