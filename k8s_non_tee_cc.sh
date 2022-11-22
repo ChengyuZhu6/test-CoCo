@@ -123,7 +123,7 @@ Test_signed_image() {
 }
 Test_encrypted_image() {
 
-	generate_encrypted_image
+	generate_encrypted_image ubuntu
 	# VERDICTDID=$(ps ux | grep "verdictd" | grep -v "grep" | awk '{print $2}')
 	# if [ "$VERDICTDID" == "" ]; then
 	# 	verdictd --listen 0.0.0.0:50000 --mutual >/dev/null 2>&1 &
