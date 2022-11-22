@@ -5,6 +5,6 @@ metadata:
 spec:
   runtimeClassName: kata-qemu-tdx-eaa-kbc
   containers:
-  - name: busybox
-    image:  docker.io/junruizh2021/busybox-encrypted-84688df7-2c0c-40fa-956b-29d8e74d16c0:latest
+  - name: ubuntu
+    image:  tdx-ci.sh.intel.com/ubuntu:encrypted
     imagePullPolicy: Always
