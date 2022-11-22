@@ -721,10 +721,10 @@ run_registry() {
         docker rm $REGISTRY_CONTAINER
     fi
     generate_crt
-    if [ $OPERATING_SYSTEM_VERSION == "ubuntu" ]; then
+    if [ "$OPERATING_SYSTEM_VERSION" == "ubuntu" ]; then
         cp $TEST_COCO_PATH/../certs/domain.crt /usr/local/share/ca-certificates/${REGISTRY_NAME}.crt
         update-ca-certificates
-    elif [ $OPERATING_SYSTEM_VERSION == "CentOS Stream" ]; then
+    elif [ "$OPERATING_SYSTEM_VERSION" == "CentOS" ]; then
         cat $TEST_COCO_PATH/../certs/domain.crt >>/etc/pki/ca-trust/source/anchors/${REGISTRY_NAME}.crt
         update-ca-trust
     fi
@@ -826,7 +826,7 @@ read_config() {
     export GPG_EMAIL=$(jq -r '.certificates.gpgEmail' $TEST_COCO_PATH/../config/test_config.json)
 
     export REPORT_FILE_PATH="$TEST_COCO_PATH/../report/"
-    export OPERATING_SYSTEM_VERSION=$(cat /etc/os-release | grep "NAME" | sed -n "1,1p" | cut -d '=' -f2)
+    export OPERATING_SYSTEM_VERSION=$(cat /etc/os-release | grep "NAME" | sed -n "1,1p" | cut -d '=' -f2|cut -d ' ' -f1| sed 's/\"//g')
     if [ ! -d $katacontainers_repo_dir ]; then
         git clone -b CCv0 https://github.com/kata-containers/kata-containers $katacontainers_repo_dir
     fi
