@@ -27,9 +27,9 @@ Test_install_operator() {
 	switch_image_service_offload on
 	add_kernel_params "agent.log=debug"
 	add_kernel_params "debug_console_enabled=true"
-	# run_registry
+	run_registry
 
-	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
+	$TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
 }
 Test_unencrypted_unsigned_image() {
 
@@ -216,10 +216,10 @@ tests() {
 main() {
 	setup
 	read_config
-	run_registry
+	# run_registry
 	# remove_kernel_param "agent.enable_signature_verification"
 	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
-	# Test_install_operator
+	Test_install_operator
 	# start_local_registry
 	# install_runtime
 	# read_config
@@ -227,8 +227,8 @@ main() {
 	# Test_measured_boot_image
 	# Test_cosign_image
 	# pull_image
-	# Test_encrypted_image
-	# Test_uninstall_operator
+	Test_encrypted_image
+	Test_uninstall_operator
 	# teardown
 }
 main "$@"
