@@ -27,9 +27,9 @@ Test_install_operator() {
 	switch_image_service_offload on
 	add_kernel_params "agent.log=debug"
 	add_kernel_params "debug_console_enabled=true"
-	run_registry
+	# run_registry
 
-	$TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
+	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
 }
 Test_unencrypted_unsigned_image() {
 
