@@ -219,16 +219,16 @@ main() {
 	# run_registry
 	# remove_kernel_param "agent.enable_signature_verification"
 	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
-	Test_install_operator
+	# Test_install_operator
 	# start_local_registry
 	# install_runtime
 	# read_config
 	# switch_measured_rootfs_verity_scheme none
 	# Test_measured_boot_image
-	# Test_cosign_image
+	Test_cosign_image
 	# pull_image
-	Test_encrypted_image
-	Test_uninstall_operator
+	# Test_encrypted_image
+	# Test_uninstall_operator
 	# teardown
 }
 main "$@"

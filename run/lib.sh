@@ -721,7 +721,7 @@ run_registry() {
         docker rm $REGISTRY_CONTAINER
     fi
     generate_crt
-    if [ "$OPERATING_SYSTEM_VERSION" == "ubuntu" ]; then
+    if [ "$OPERATING_SYSTEM_VERSION" == "Ubuntu" ]; then
         cp $TEST_COCO_PATH/../certs/domain.crt /usr/local/share/ca-certificates/${REGISTRY_NAME}.crt
         update-ca-certificates
     elif [ "$OPERATING_SYSTEM_VERSION" == "CentOS" ]; then
@@ -741,9 +741,9 @@ run_registry() {
 pull_image() {
     VERSION=latest
     for IMAGE in ${EXAMPLE_IMAGE_LISTS[@]}; do
-        docker pull $IMAGE:$VERSION >/dev/null 2>&1
-        docker tag $IMAGE:$VERSION $REGISTRY_NAME/$IMAGE:$VERSION >/dev/null 2>&1
-        docker push $REGISTRY_NAME/$IMAGE:$VERSION >/dev/null 2>&1
+        docker pull $IMAGE:$VERSION 
+        docker tag $IMAGE:$VERSION $REGISTRY_NAME/ci-$IMAGE:$VERSION 
+        docker push $REGISTRY_NAME/ci-$IMAGE:$VERSION 
     done
 }
 

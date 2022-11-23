@@ -130,13 +130,13 @@ run_multiple_pod_spec_and_images_config() {
 	local new_pod_configs="$TEST_COCO_PATH/../tests/multiple_pod_spec_and_images.bats"
 	local str="Test_multiple_pod_spec_and_images"
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		docker pull $image
-		image_size=$(docker image ls | grep $image | head -1 | awk '{print $7}')
+		#docker pull $image
+		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		for runtimeclass in ${RUNTIMECLASS[@]}; do
 			for cpunums in ${CPUCONFIG[@]}; do
 				for memsize in ${MEMCONFIG[@]}; do
-					cat "$(generate_tests $image $image_size $runtimeclass $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
-					tests_passing+="|${str} $image $image_size $runtimeclass ${cpunums} ${memsize}GB"
+					cat "$(generate_tests ci-$image $image_size $runtimeclass $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
+					tests_passing+="|${str} ci-$image $image_size $runtimeclass ${cpunums} ${memsize}GB"
 				done
 			done
 		done
@@ -155,11 +155,11 @@ run_trust_storage_config() {
 	tests_passing="Test install open-local"
 	cp $pod_configs $new_pod_configs
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		docker pull $image
-		image_size=$(docker image ls | grep $image | head -1 | awk '{print $7}')
+		#docker pull $image
+		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			cat "$(generate_tests_trust_storage "$TEST_COCO_PATH/../templates/trust_storage.template" $image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} $image $image_size $runtimeclass "
+			cat "$(generate_tests_trust_storage "$TEST_COCO_PATH/../templates/trust_storage.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+			tests_passing+="|${str} ci-$image $image_size $runtimeclass "
 
 		done
 	done
@@ -173,11 +173,11 @@ run_signed_image_config() {
 	local new_pod_configs="$TEST_COCO_PATH/../tests/signed_image.bats"
 	local str="Test_signed_image"
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		docker pull $image
-		image_size=$(docker image ls | grep $image | head -1 | awk '{print $7}')
+		#docker pull $image
+		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			cat "$(generate_tests_signed_image "$TEST_COCO_PATH/../templates/signed_image.template" $image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} $image $image_size $runtimeclass"
+			cat "$(generate_tests_signed_image "$TEST_COCO_PATH/../templates/signed_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		done
 	done
 	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
@@ -191,12 +191,12 @@ run_cosigned_image_config() {
 	local str="Test_cosigned_image"
 	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		docker pull $image
-		image_size=$(docker image ls | grep $image | head -1 | awk '{print $7}')
+		#docker pull $image
+		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 
 		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			cat "$(generate_tests_cosign_image "$TEST_COCO_PATH/../templates/cosigned_image.template" $image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} $image $image_size $runtimeclass"
+			cat "$(generate_tests_cosign_image "$TEST_COCO_PATH/../templates/cosigned_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		done
 	done
 
@@ -210,11 +210,11 @@ run_encrypted_image_config() {
 	local str="Test_encrypted_image"
 	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		docker pull $image
-		image_size=$(docker image ls | grep $image | head -1 | awk '{print $7}')
+		#docker pull $image
+		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			cat "$(generate_tests_encrypted_image "$TEST_COCO_PATH/../templates/encrypted_image.template" $image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} $image $image_size $runtimeclass"
+			cat "$(generate_tests_encrypted_image "$TEST_COCO_PATH/../templates/encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		done
 	done
 
@@ -227,11 +227,11 @@ run_offline_encrypted_image_config() {
 	local new_pod_configs="$TEST_COCO_PATH/../tests/offline_encrypted_image.bats"
 	local str="Test_offline_encrypted_image"
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		docker pull $image
-		image_size=$(docker image ls | grep $image | head -1 | awk '{print $7}')
+		#docker pull $image
+		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/offline_encrypted_image.template" $image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} $image $image_size $runtimeclass"
+			cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/offline_encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		done
 	done
 	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
@@ -246,11 +246,11 @@ run_measured_boot_image_config() {
 	local str="Test_measured_boot"
 	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		docker pull $image
-		image_size=$(docker image ls | grep $image | head -1 | awk '{print $7}')
+		#docker pull $image
+		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/measured_boot.template" $image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} $image $image_size $runtimeclass"
+			cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/measured_boot.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		done
 	done
 	bats -f "$tests_passing" \
