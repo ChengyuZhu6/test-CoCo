@@ -71,7 +71,7 @@ install_cc() {
     # sed -i 's/latest/v0.1.0/g' $GOPATH/src/github.com/operator-0.1.0/deploy/deploy.yaml
     # kubectl apply -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/deploy/deploy.yaml
     kubectl apply -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
-    # kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+    kubectl taint nodes --all node-role.kubernetes.io/control-plane-
     test_pod_for_deploy
     if [ $? -eq 1 ]; then
         echo "ERROR: operator deployment failed !"
