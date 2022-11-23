@@ -1,3 +1,5 @@
+#!/bin/bash
+
 install_skopeo() {
     git clone https://github.com/containers/skopeo $GOPATH/src/github.com/containers/skopeo
     cd $GOPATH/src/github.com/containers/skopeo && make bin/skopeo
