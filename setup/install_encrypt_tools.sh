@@ -6,7 +6,7 @@ install_skopeo() {
     apt-get install go-md2man
     make install
 }
-install_attestation-agent() {
+install_attestation_agent() {
     git clone https://github.com/containers/attestation-agent $GOPATH/src/github.com/attestation-agent
     cd $GOPATH/src/github.com/attestation-agent
     make KBC=eaa_kbc && make install

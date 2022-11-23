@@ -277,7 +277,7 @@ setup_env() {
 	echo "install skopeo"
 	install_skopeo
 	echo "install attestation-agent"
-	install_attestation-agent
+	install_attestation_agent
 	echo "install verdictd"
 	install_verdictd
 	echo "install cosign"
