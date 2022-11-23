@@ -265,23 +265,23 @@ print_image() {
 	done
 }
 setup_env() {
-	# echo "install go"
-	# $SCRIPT_PATH/setup/install_go.sh
-	# echo "install rust"
-	# $SCRIPT_PATH/setup/install_rust.sh
-	# echo "install Kubernetes"
-	# git clone https://github.com/ChengyuZhu6/tests.git $GOPATH/src/github.com/kata-containers/tests 
-	# bash $GOPATH/src/github.com/kata-containers/tests/.ci/setup.sh 
-	# echo "install bats"
-	# $SCRIPT_PATH/setup/install_bats.sh
-	# echo "install skopeo"
-	# install_skopeo
-	# echo "install attestation-agent"
-	# install_attestation-agent
-	# echo "install verdictd"
-	# install_verdictd
-	# echo "install cosign"
-	# install_cosign
+	echo "install go"
+	$SCRIPT_PATH/setup/install_go.sh
+	echo "install rust"
+	$SCRIPT_PATH/setup/install_rust.sh
+	echo "install Kubernetes"
+	git clone https://github.com/ChengyuZhu6/tests.git $GOPATH/src/github.com/kata-containers/tests 
+	bash $GOPATH/src/github.com/kata-containers/tests/.ci/setup.sh 
+	echo "install bats"
+	$SCRIPT_PATH/setup/install_bats.sh
+	echo "install skopeo"
+	install_skopeo
+	echo "install attestation-agent"
+	install_attestation-agent
+	echo "install verdictd"
+	install_verdictd
+	echo "install cosign"
+	install_cosign
 }
 main() {
 	$SCRIPT_PATH/serverinfo/serverinfo-stdout.sh
