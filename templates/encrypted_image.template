@@ -2,6 +2,7 @@
 	#skip  
 	set_runtimeclass_config $RUNTIMECLASSNAME
 	clear_kernel_params
+	switch_image_service_offload on
 	#switch_measured_rootfs_verity_scheme none
 	remove_kernel_param "agent.enable_signature_verification"
 	#generate_encrypted_image $IMAGE
