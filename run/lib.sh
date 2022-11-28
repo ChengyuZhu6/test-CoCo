@@ -813,21 +813,33 @@ set_runtimeclass_config() {
     case $runtime_class in
     "kata-qemu")
         export CURRENT_CONFIG_FILE="configuration-qemu.toml"
+        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
+
         ;;
     "kata-clh")
         export CURRENT_CONFIG_FILE="configuration-clh.toml"
+        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
+
         ;;
     "kata-qemu-tdx")
         export CURRENT_CONFIG_FILE="configuration-qemu-tdx.toml"
+        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
+
         ;;
     "kata-clh-tdx")
         export CURRENT_CONFIG_FILE="configuration-clh-tdx.toml"
+        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
+
         ;;
     "kata-clh-tdx-eaa-kbc")
         export CURRENT_CONFIG_FILE="configuration-clh-tdx-eaa-kbc.toml"
+        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image"
+
         ;;
     "kata-qemu-tdx-eaa-kbc")
         export CURRENT_CONFIG_FILE="configuration-qemu-tdx-eaa-kbc.toml"
+        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image"
+
         ;;
     esac
 
@@ -1030,26 +1042,25 @@ delete_containerd_cri_stale_resource() {
     sudo rm -f /etc/systemd/system/containerd.service
 }
 cleanup_network_interface() {
-	 FLANNEL=$(ls /sys/class/net | grep flannel)
-	 CNI=$(ls /sys/class/net | grep cni)
+    FLANNEL=$(ls /sys/class/net | grep flannel)
+    CNI=$(ls /sys/class/net | grep cni)
 
-	[ "$FLANNEL" != "" ] && sudo ip link del $FLANNEL
-	[ "$CNI" != "" ] && sudo ip link del $CNI
+    [ "$FLANNEL" != "" ] && sudo ip link del $FLANNEL
+    [ "$CNI" != "" ] && sudo ip link del $CNI
 
-	FLANNEL=$(ls /sys/class/net | grep flannel)
-	CNI=$(ls /sys/class/net | grep cni)
+    FLANNEL=$(ls /sys/class/net | grep flannel)
+    CNI=$(ls /sys/class/net | grep cni)
 
-	[ "$FLANNEL" != "" ] && echo "$FLANNEL doesn't clean up"
-	[ "$CNI" != "" ] && echo "$CNI doesn't clean up"
+    [ "$FLANNEL" != "" ] && echo "$FLANNEL doesn't clean up"
+    [ "$CNI" != "" ] && echo "$CNI doesn't clean up"
 }
 
-delete_stale_kata_resource()
-{
-	for stale_kata_dir in "${stale_kata_dir_union[@]}"; do
-		if [ -d "${stale_kata_dir}" ]; then
-			sudo rm -rf "${stale_kata_dir}"
-		fi
-	done
+delete_stale_kata_resource() {
+    for stale_kata_dir in "${stale_kata_dir_union[@]}"; do
+        if [ -d "${stale_kata_dir}" ]; then
+            sudo rm -rf "${stale_kata_dir}"
+        fi
+    done
 }
 gen_clean_arch() {
     KATA_DOCKER_TIMEOUT=30

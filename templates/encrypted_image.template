@@ -1,10 +1,10 @@
 @test "Test_encrypted_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
 	#skip  
 	set_runtimeclass_config $RUNTIMECLASSNAME
-	clear_kernel_params
+	#clear_kernel_params
 	switch_image_service_offload on
-	#switch_measured_rootfs_verity_scheme none
-	remove_kernel_param "agent.enable_signature_verification"
+	switch_measured_rootfs_verity_scheme none
+	#remove_kernel_param "agent.enable_signature_verification"
 	#generate_encrypted_image $IMAGE
 	VERDICTDID=$(ps ux | grep "verdictd" | grep -v "grep" | awk '{print $2}')
 	if [ "$VERDICTDID" == "" ]; then
