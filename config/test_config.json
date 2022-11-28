@@ -6,7 +6,6 @@
 			"kata-clh"
 		],
 		"TDXRuntimeClass": [
-			"kata-qemu-tdx",
 			"kata-clh-tdx"
 		],
 		"eaaTDXRuntimeClass": [
