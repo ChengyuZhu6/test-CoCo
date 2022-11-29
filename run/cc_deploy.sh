@@ -66,15 +66,15 @@ reset_runtime() {
         systemctl restart containerd
     fi
     # rm -r $GOPATH/src/github.com/operator-${OPERATOR_VERSION}
-    REGISTRY_CONTAINER=$(docker ps -a | grep "registry" | awk '{print $1}')
-    if [ -n "$REGISTRY_CONTAINER" ]; then
-        docker stop $REGISTRY_CONTAINER
-        docker rm $REGISTRY_CONTAINER
-    fi
-    rm -rf ~/.kube/ || true
-    remove_cni
+    # REGISTRY_CONTAINER=$(docker ps -a | grep "registry" | awk '{print $1}')
+    # if [ -n "$REGISTRY_CONTAINER" ]; then
+    #     docker stop $REGISTRY_CONTAINER
+    #     docker rm $REGISTRY_CONTAINER
+    # fi
+    # rm -rf ~/.kube/ || true
+    # remove_cni
 
-    remove_flannel
+    # remove_flannel
     return 0
 }
 install_cc() {
