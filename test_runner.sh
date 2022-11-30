@@ -119,13 +119,13 @@ generate_tests() {
 }
 run_operator_install() {
 	tests_passing="Test install operator"
-	echo "$(/usr/local/bin/bats -f "$tests_passing" \
+	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../templates/operator_install.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/operator_install.xml
 }
 run_operator_uninstall() {
 	tests_passing="Test uninstall operator"
-	echo "$(/usr/local/bin/bats -f "$tests_passing" \
+	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../templates/operator_uninstall.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/operator_uninstall.xml
 }
@@ -152,7 +152,7 @@ run_multiple_pod_spec_and_images_config() {
 			done
 		done
 	done
-	echo "$(/usr/local/bin/bats -f "$tests_passing" \
+	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/multiple_pod_spec_and_images.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tests/*
@@ -180,7 +180,7 @@ run_trust_storage_config() {
 	done
 	cat "$TEST_COCO_PATH/../templates/operator_trust_storage.bats" | tee -a $new_pod_configs >/dev/null
 	tests_passing+="|Test uninstall open-local"
-	echo "$(/usr/local/bin/bats -f "$tests_passing" \
+	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/trust_storage.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tests/*
@@ -202,7 +202,7 @@ run_signed_image_config() {
 		done
 	done
 	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
-	echo "$(/usr/local/bin/bats -f "$tests_passing" \
+	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/signed_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tests/*
@@ -227,7 +227,7 @@ run_cosigned_image_config() {
 		done
 	done
 
-	echo "$(/usr/local/bin/bats -f "$tests_passing" \
+	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/cosigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tests/*
@@ -252,7 +252,7 @@ run_encrypted_image_config() {
 		done
 	done
 
-	echo "$(/usr/local/bin/bats -f "$tests_passing" \
+	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tests/*
@@ -277,7 +277,7 @@ run_offline_encrypted_image_config() {
 	done
 	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
 
-	echo "$(/usr/local/bin/bats -f "$tests_passing" \
+	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/offline_encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tests/*
@@ -300,7 +300,7 @@ run_measured_boot_image_config() {
 			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		done
 	done
-	echo "$(/usr/local/bin/bats -f "$tests_passing" \
+	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/measured_boot.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tests/*
