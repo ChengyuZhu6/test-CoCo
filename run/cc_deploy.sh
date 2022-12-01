@@ -132,6 +132,7 @@ install_runtime() {
 }
 
 init_kubeadm() {
+    echo "PATH=$PATH"
     local kubeadm_config_file="/etc/kubeadm/kubeadm.conf"
     # Bootstrap the control-plane node.
     kubeadm init --config "${kubeadm_config_file}"
