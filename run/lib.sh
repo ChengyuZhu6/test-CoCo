@@ -728,15 +728,15 @@ set_docker_certs() {
     systemctl restart docker
 }
 get_certs_from_remote() {
-    # scp chengyu@$REGISTRY_NAME:/certs/domain.* $TEST_COCO_PATH/../certs/
-    # if [ "$OPERATING_SYSTEM_VERSION" == "Ubuntu" ]; then
-    #     cp $TEST_COCO_PATH/../certs/domain.crt /usr/local/share/ca-certificates/${REGISTRY_NAME}.crt
-    #     update-ca-certificates
-    # elif [ "$OPERATING_SYSTEM_VERSION" == "CentOS" ]; then
-    #     cat $TEST_COCO_PATH/../certs/domain.crt >>/etc/pki/ca-trust/source/anchors/${REGISTRY_NAME}.crt
-    #     update-ca-trust
-    # fi
-    # set_docker_certs
+    scp chengyu@$REGISTRY_NAME:/certs/domain.* $TEST_COCO_PATH/../certs/
+    if [ "$OPERATING_SYSTEM_VERSION" == "Ubuntu" ]; then
+        cp $TEST_COCO_PATH/../certs/domain.crt /usr/local/share/ca-certificates/${REGISTRY_NAME}.crt
+        update-ca-certificates
+    elif [ "$OPERATING_SYSTEM_VERSION" == "CentOS" ]; then
+        cat $TEST_COCO_PATH/../certs/domain.crt >>/etc/pki/ca-trust/source/anchors/${REGISTRY_NAME}.crt
+        update-ca-trust
+    fi
+    set_docker_certs
     pull_image
 }
 run_registry() {
