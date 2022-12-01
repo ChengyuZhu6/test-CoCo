@@ -10,7 +10,8 @@
 			"kata-qemu-tdx"
 		],
 		"eaaTDXRuntimeClass": [
-			"kata-qemu-tdx-eaa-kbc"
+			"kata-qemu-tdx-eaa-kbc",
+			"kata-clh-tdx-eaa-kbc"
 		],
 		"podNum": [
 			"1",
