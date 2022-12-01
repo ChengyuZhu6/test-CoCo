@@ -30,8 +30,7 @@
 	},
 	"file": {
 		"commentsImageLists": [
-			"ubuntu",
-			"nginx"
+			"ubuntu"
 		],
 		"notCommentsImageLists": [
 			"example256M",
