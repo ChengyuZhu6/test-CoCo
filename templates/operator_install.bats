@@ -13,8 +13,8 @@ setup() {
 
 @test "Test install operator" {
 	#install_runtime
-	export PATH=$PATH:/usr/local/bin:/usr/local/sbin
-	echo "PATH=$PATH" >&3
+	#export PATH=$PATH:/usr/local/bin:/usr/local/sbin
+	#echo "PATH=$PATH" >&3
 	init_kubeadm
 	echo "Prepare containerd for Confidential Container"
 

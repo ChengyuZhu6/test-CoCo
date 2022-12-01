@@ -91,13 +91,13 @@ parse_args() {
 		d) ;;
 		a)
 			run_operator_install
-			run_multiple_pod_spec_and_images_config
-			# run_encrypted_image_config
-			run_offline_encrypted_image_config
-			run_signed_image_config
-			run_cosigned_image_config
-			run_trust_storage_config
-			run_measured_boot_image_config
+			# run_multiple_pod_spec_and_images_config
+			run_encrypted_image_config
+			# run_offline_encrypted_image_config
+			# run_signed_image_config
+			# run_cosigned_image_config
+			# run_trust_storage_config
+			# run_measured_boot_image_config
 			run_operator_uninstall
 			;;
 		h) usage 0 ;;
