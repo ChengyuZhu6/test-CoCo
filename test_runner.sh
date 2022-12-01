@@ -401,7 +401,7 @@ main() {
 	parse_args $@
 	# echo $(gen_clean_arch)
 	# rm -r $GOPATH/src/github.com/operator
-	clean_up
+	# clean_up
 	cleanup_network_interface
 }
 
