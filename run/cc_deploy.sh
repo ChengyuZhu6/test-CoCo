@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 readonly op_ns="confidential-containers-system"
 source $(pwd)/run/common.bash
 wait_for_process() {
