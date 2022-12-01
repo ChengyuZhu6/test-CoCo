@@ -512,8 +512,12 @@ setup_eaa_kbc_agent_config_in_guest() {
 }
 setup_eaa_decryption_files_in_guest() {
     add_kernel_params "agent.aa_kbc_params=eaa_kbc::10.112.240.208:50000"
+    cat <<-EOF >/opt/verdictd/keys/84688df7-2c0c-40fa-956b-29d8e74d16c0
+1234567890123456789012345678901
+EOF
+export OCICRYPT_KEYPROVIDER_CONFIG=/etc/containerd/ocicrypt/ocicrypt_keyprovider.conf
     # setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.239.159.53:50000"
-    setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.112.240.208:50000"
+    # setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.112.240.208:50000"
 }
 setup_offline_decryption_files_in_guest() {
     add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
