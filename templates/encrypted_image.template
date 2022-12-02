@@ -10,7 +10,7 @@
 	echo "$RUNTIMECLASSNAME" >&3
 	VERDICTDID=$(ps ux | grep "verdictd" | grep -v "grep" | awk '{print $2}')
 	if [ "$VERDICTDID" == "" ]; then
-		verdictd --listen 0.0.0.0:50000  >/dev/null 2>&1 &
+		verdictd --listen 0.0.0.0:50000  2>&1 &
 	fi
 	sleep 1
 	setup_eaa_decryption_files_in_guest
