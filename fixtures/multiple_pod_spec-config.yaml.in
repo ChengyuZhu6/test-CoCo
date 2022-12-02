@@ -14,8 +14,8 @@ spec:
       imagePullPolicy: Always
       resources:
         limits:
-          cpu: "${LIMITCPU}m"
+          cpu: "${LIMITCPU}"
           memory: "${LIMITMEM}Gi"
         requests:
-          cpu: "${REQUESTCPU}m"
+          cpu: "${REQUESTCPU}"
           memory: "${REQUESTMEM}Gi"
