@@ -1,8 +1,8 @@
 
 apt-get install build-essential ocaml ocamlbuild automake autoconf libtool wget python-is-python3 libssl-dev git cmake perl
 apt-get install libssl-dev libcurl4-openssl-dev protobuf-compiler libprotobuf-dev debhelper cmake reprepro unzip pkgconf libboost-dev libboost-system-dev protobuf-c-compiler libprotobuf-c-dev lsb-release
-git clone https://github.com/intel/linux-sgx.git
-cd linux-sgx && make preparation
+git clone https://github.com/intel/linux-sgx.git $GOPATH/src/github.com/linux-sgx
+cd $GOPATH/src/github.com/linux-sgx && make preparation
 cp external/toolset/ubuntu20.04/*  /usr/local/bin
 which ar as ld objcopy objdump ranlib
 
@@ -11,8 +11,8 @@ make sdk_install_pkg
 
 
 
-chmod +x linux/installer/bin/sgx_linux_x64_sdk_2.17.101.1.bin
-./linux/installer/bin/sgx_linux_x64_sdk_2.17.101.1.bin
+chmod +x ./linux/installer/bin/sgx_linux_x64_sdk_2.18.100.3.bin
+./linux/installer/bin/sgx_linux_x64_sdk_2.18.100.3.bin
 
 source /opt/intel/sgxsdk/environment
 

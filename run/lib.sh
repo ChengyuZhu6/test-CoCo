@@ -445,7 +445,7 @@ EOF
     sleep 1
     # Launch Verdictd in another terminal
 
-    # skopeo --insecure-policy copy docker://docker.io/library/busybox:latest oci:busybox
+    # skopeo --insecure-policy copy docker://ngcn-registry.sh.intel.com/ci-ubuntu:encrypted oci:ubuntu
     # skopeo copy --insecure-policy --encryption-key provider:attestation-agent:84688df7-2c0c-40fa-956b-29d8e74d16c0 oci:busybox docker://zcy-Z390-AORUS-MASTER.sh.intel.com/busybox-encrypted:latest
 
     export OCICRYPT_KEYPROVIDER_CONFIG=/etc/containerd/ocicrypt/ocicrypt_keyprovider.conf
@@ -488,6 +488,10 @@ EOF
     offline_kbs_id=$(ps ux | grep "sample_keyprovider" | grep -v "grep" | awk '{print $2}')
     echo $offline_kbs_id
     kill -9 $offline_kbs_id
+}
+test_descryption_eaa_kbc(){
+    local img=$1
+
 }
 setup_eaa_kbc_agent_config_in_guest() {
     local rootfs_agent_config="/etc/agent-config.toml"
