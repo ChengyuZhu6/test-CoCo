@@ -1,4 +1,4 @@
-@test "Test_signed_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
+@test "Test_simple_signed_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
 	set_runtimeclass_config $RUNTIMECLASSNAME
 	#switch_measured_rootfs_verity_scheme none
 	#remove_kernel_param "agent.enable_signature_verification"

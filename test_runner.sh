@@ -91,13 +91,13 @@ parse_args() {
 		d) ;;
 		a)
 			run_operator_install
-			# run_multiple_pod_spec_and_images_config
+			run_multiple_pod_spec_and_images_config
 			run_encrypted_image_config
-			# run_offline_encrypted_image_config
-			# run_signed_image_config
-			# run_cosigned_image_config
-			# run_trust_storage_config
-			# run_measured_boot_image_config
+			run_offline_encrypted_image_config
+			run_signed_image_config
+			run_cosigned_image_config
+			run_trust_storage_config
+			run_measured_boot_image_config
 			run_operator_uninstall
 			;;
 		h) usage 0 ;;
@@ -192,7 +192,7 @@ run_signed_image_config() {
 		return 1
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tests/signed_image.bats"
-	local str="Test_signed_image"
+	local str="Test_simple_signed_image"
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
@@ -240,7 +240,7 @@ run_encrypted_image_config() {
 		return 1
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tests/encrypted_image.bats"
-	local str="Test_encrypted_image"
+	local str="Test_eaa_kbc_encrypted_image"
 	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image

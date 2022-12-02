@@ -446,7 +446,7 @@ EOF
     # Launch Verdictd in another terminal
 
     # skopeo --insecure-policy copy docker://ngcn-registry.sh.intel.com/ci-ubuntu:encrypted oci:ubuntu
-    # skopeo copy --insecure-policy --encryption-key provider:attestation-agent:84688df7-2c0c-40fa-956b-29d8e74d16c0 oci:busybox docker://zcy-Z390-AORUS-MASTER.sh.intel.com/busybox-encrypted:latest
+    # skopeo copy --insecure-policy --encryption-key provider:attestation-agent:84688df7-2c0c-40fa-956b-29d8e74d16c0 docker://ngcn-registry.sh.intel.com/ci-ubuntu:latest oci:ubuntu-encrypted
 
     export OCICRYPT_KEYPROVIDER_CONFIG=/etc/containerd/ocicrypt/ocicrypt_keyprovider.conf
 

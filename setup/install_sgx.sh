@@ -17,6 +17,7 @@ chmod +x ./linux/installer/bin/sgx_linux_x64_sdk_2.18.100.3.bin
 source /opt/intel/sgxsdk/environment
 
 # make psw
+cp /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.71.0 /usr/lib/libboost_thread.so
 make deb_psw_pkg
 
 apt-get install -y dpkg-dev
@@ -33,10 +34,10 @@ cd /var/www/html/repo
 apt-ftparchive packages . > Packages
 apt-ftparchive release . > Release
 gpg --gen-key #gpg --list-keys查看
-gpg -a --export 60392C6D3D1F3C676252F1BE9AAFEE17D277E443 | apt-key add -  #apt客户端导入公钥
+gpg -a --export C579BF4EAA2568D80FAEF5CCE0642632EF03C674 | apt-key add -  #apt客户端导入公钥
 gpg -a --export intel > username.pub  #导出公钥
 apt-key add username.pub #导入公钥
-gpg -a --export 60392C6D3D1F3C676252F1BE9AAFEE17D277E443 | apt-key add -     #其中pub key可用gpg --list-keys查到
+gpg -a --export C579BF4EAA2568D80FAEF5CCE0642632EF03C674 | apt-key add -     #其中pub key可用gpg --list-keys查到
 gpg --clearsign -o InRelease Release #gpg生成一个明文签名
 gpg -abs -o Release.gpg Release #gpg生成一个分离签名
 
@@ -48,6 +49,6 @@ EOF
 apt update
 
 apt-get install -y libsgx-launch libsgx-urts libsgx-epid libsgx-quote-ex libsgx-dcap-ql libsgx-enclave-common-dev libsgx-dcap-quote-verify-dev libsgx-dcap-ql-dev libsgx-tdx-logic-dev libtdx-attest-dev 
-cp ./external/dcap_source/QuoteGeneration/installer/linux/common/libtdx-attest/output/pkgroot/libtdx-attest/lib/libtdx_attest.so /usr/local/lib
-cp ./external/dcap_source/QuoteGeneration/installer/linux/common/libtdx-attest/output/pkgroot/libtdx-attest/lib/libtdx_attest.so /usr/lib
+cp $GOPATH/src/github.com/linux-sgx/external/dcap_source/QuoteGeneration/installer/linux/common/libtdx-attest/output/pkgroot/libtdx-attest/lib/libtdx_attest.so /usr/local/lib
+cp $GOPATH/src/github.com/linux-sgx/external/dcap_source/QuoteGeneration/installer/linux/common/libtdx-attest/output/pkgroot/libtdx-attest/lib/libtdx_attest.so /usr/lib
 
