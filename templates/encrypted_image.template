@@ -6,7 +6,7 @@
 	$TEST_COCO_PATH/../run/losetup-crt.sh /opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image c
 	switch_measured_rootfs_verity_scheme none
 	#remove_kernel_param "agent.enable_signature_verification"
-	#generate_encrypted_image ci-$IMAGE
+	generate_encrypted_image ci-$IMAGE
 	echo "$RUNTIMECLASSNAME" >&3
 	VERDICTDID=$(ps ux | grep "verdictd" | grep -v "grep" | awk '{print $2}')
 	if [ "$VERDICTDID" == "" ]; then
