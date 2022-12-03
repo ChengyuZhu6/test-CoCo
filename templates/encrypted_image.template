@@ -6,7 +6,7 @@
 	$TEST_COCO_PATH/../run/losetup-crt.sh /opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image c
 	switch_measured_rootfs_verity_scheme none
 	#remove_kernel_param "agent.enable_signature_verification"
-	generate_encrypted_image ci-$IMAGE
+	generate_encrypted_image $IMAGE
 	echo "$RUNTIMECLASSNAME" >&3
 	VERDICTDID=$(ps ux | grep "verdictd" | grep -v "grep" | awk '{print $2}')
 	if [ "$VERDICTDID" == "" ]; then
@@ -14,7 +14,7 @@
 	fi
 	sleep 1
 	setup_eaa_decryption_files_in_guest
-	pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/encrypted_image-config.yaml.in "ci-$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRY_NAME/ci-$IMAGE:encrypted")"
+	pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/encrypted_image-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRY_NAME/$IMAGE:encrypted")"
 	pull_encrypted_image_inside_guest_with_decryption_key $pod_config
 	# assert_pod_fail "$pod_config"
 	rm $pod_config
