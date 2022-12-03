@@ -62,6 +62,6 @@ split_content() {
 
 generate_xls() {
     python3 $TEST_COCO_PATH/../run/generate_xls.py $csv_file
-    rm $TEST_COCO_PATH/../report/*.xml
+    # rm $TEST_COCO_PATH/../report/*.xml
 }
 split_content
