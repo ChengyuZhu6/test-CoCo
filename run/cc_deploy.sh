@@ -77,7 +77,7 @@ reset_runtime() {
     # remove_cni
 
     # remove_flannel
-    return 0
+    # return 0
 }
 install_cc() {
     OPERATOR_VERSION=$(jq -r .file.operatorVersion $TEST_COCO_PATH/../config/test_config.json)

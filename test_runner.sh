@@ -411,6 +411,7 @@ main() {
 	# clean_up
 	cleanup_network_interface
 	echo "tests are finished"
+	# return 0
 }
 
 main "$@"
