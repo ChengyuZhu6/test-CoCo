@@ -91,7 +91,7 @@ parse_args() {
 		d) ;;
 		a)
 			run_operator_install
-			# run_multiple_pod_spec_and_images_config
+			run_multiple_pod_spec_and_images_config
 			run_encrypted_image_config
 			run_offline_encrypted_image_config
 			run_signed_image_config
@@ -242,6 +242,10 @@ run_encrypted_image_config() {
 	local new_pod_configs="$TEST_COCO_PATH/../tests/encrypted_image.bats"
 	local str="Test_eaa_kbc_encrypted_image"
 	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
+	VERDICTDID=$(ps ux | grep "verdictd" | grep -v "grep" | awk '{print $2}')
+	if [ "$VERDICTDID" == "" ]; then
+		verdictd --listen 0.0.0.0:50000  2>&1 &
+	fi
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
@@ -254,6 +258,9 @@ run_encrypted_image_config() {
 
 	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+	VERDICTDID=$(ps ux | grep "verdictd " | grep -v "grep" | awk '{print $2}')
+	echo $VERDICTDID
+	kill -9 $VERDICTDID
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tests/*
 	rm -rf $TEST_COCO_PATH/../fixtures/encrypted_image-config.yaml.in.*
@@ -266,6 +273,7 @@ run_offline_encrypted_image_config() {
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tests/offline_encrypted_image.bats"
 	local str="Test_offline_encrypted_image"
+	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
@@ -275,7 +283,6 @@ run_offline_encrypted_image_config() {
 			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		done
 	done
-	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
 
 	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/offline_encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
