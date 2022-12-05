@@ -241,10 +241,10 @@ run_encrypted_image_config() {
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tests/encrypted_image.bats"
 	local str="Test_eaa_kbc_encrypted_image"
-	VERDICTDID=$(ps ux | grep "verdictd" | grep -v "grep" | awk '{print $2}')
-	if [ "$VERDICTDID" == "" ]; then
-		verdictd --listen 0.0.0.0:50000  2>&1 &
-	fi
+	# VERDICTDID=$(ps ux | grep "verdictd" | grep -v "grep" | awk '{print $2}')
+	# if [ "$VERDICTDID" == "" ]; then
+	# 	verdictd --listen 0.0.0.0:50000  2>&1 &
+	# fi
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
@@ -258,9 +258,9 @@ run_encrypted_image_config() {
 
 	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	VERDICTDID=$(ps ux | grep "verdictd " | grep -v "grep" | awk '{print $2}')
-	echo $VERDICTDID
-	kill -9 $VERDICTDID
+	# VERDICTDID=$(ps ux | grep "verdictd " | grep -v "grep" | awk '{print $2}')
+	# echo $VERDICTDID
+	# kill -9 $VERDICTDID
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tests/*
 	rm -rf $TEST_COCO_PATH/../fixtures/encrypted_image-config.yaml.in.*
