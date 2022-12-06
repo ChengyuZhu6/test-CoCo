@@ -2,6 +2,10 @@ load ../run/lib.sh
 load ../run/cc_deploy.sh
 @test "Test uninstall operator" {
 	#skip
-	run -0 reset_runtime
-	[ "$output" = "foo: no such file 'nonexistent_filename'" ]
+	reset_runtime
+	if [ $? -ne 0 ]; then
+        echo "ERROR: uninstall operator failed !"
+        return 1
+    fi
+	return 0
 }
