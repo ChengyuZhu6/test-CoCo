@@ -489,7 +489,7 @@ EOF
     echo $offline_kbs_id
     kill -9 $offline_kbs_id
 }
-test_descryption_eaa_kbc(){
+test_descryption_eaa_kbc() {
     local img=$1
 
 }
@@ -519,7 +519,7 @@ setup_eaa_decryption_files_in_guest() {
     cat <<-EOF >/opt/verdictd/keys/84688df7-2c0c-40fa-956b-29d8e74d16c0
 1234567890123456789012345678901
 EOF
-export OCICRYPT_KEYPROVIDER_CONFIG=/etc/containerd/ocicrypt/ocicrypt_keyprovider.conf
+    export OCICRYPT_KEYPROVIDER_CONFIG=/etc/containerd/ocicrypt/ocicrypt_keyprovider.conf
     # setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.239.159.53:50000"
     # setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.112.240.208:50000"
 }
@@ -1053,14 +1053,17 @@ cleanup_network_interface() {
     FLANNEL=$(ls /sys/class/net | grep flannel)
     CNI=$(ls /sys/class/net | grep cni)
 
-    [ "$FLANNEL" != "" ] && sudo ip link del $FLANNEL
-    [ "$CNI" != "" ] && sudo ip link del $CNI
+    if [ "$FLANNEL" != "" ]; then
+        ip link del $FLANNEL
+    fi
+    if [ "$CNI" != "" ]; then
+        ip link del $CNI
+    fi
+    # FLANNEL=$(ls /sys/class/net | grep flannel)
+    # CNI=$(ls /sys/class/net | grep cni)
 
-    FLANNEL=$(ls /sys/class/net | grep flannel)
-    CNI=$(ls /sys/class/net | grep cni)
-
-    [ "$FLANNEL" != "" ] && echo "$FLANNEL doesn't clean up"
-    [ "$CNI" != "" ] && echo "$CNI doesn't clean up"
+    # [ "$FLANNEL" != "" ] && echo "$FLANNEL doesn't clean up"
+    # [ "$CNI" != "" ] && echo "$CNI doesn't clean up"
     echo "###################"
     return 0
 }
@@ -1168,18 +1171,18 @@ test_pod_for_ccruntime() {
     done
 }
 remove_cni() {
-	local dev="cni0"
+    local dev="cni0"
 
-	rm -rf /etc/cni/net.d
-	ip link set dev "$dev" down || true
-	ip link del "$dev" || true
+    rm -rf /etc/cni/net.d
+    ip link set dev "$dev" down || true
+    ip link del "$dev" || true
 }
 
 remove_flannel() {
-	local dev="flannel.1"
+    local dev="flannel.1"
 
-	ip link set dev "$dev" down || true
-	ip link del "$dev" || true
+    ip link set dev "$dev" down || true
+    ip link del "$dev" || true
 }
 reset_runtime() {
     OPERATOR_VERSION=$(jq -r .file.operatorVersion $TEST_COCO_PATH/../config/test_config.json)
