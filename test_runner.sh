@@ -104,7 +104,6 @@ parse_args() {
 			;;
 		esac
 	done
-	echo "!!!!!!!!!!!!!!!!"
 	return 0
 }
 generate_tests() {
@@ -404,7 +403,6 @@ main() {
 		mkdir -p $SCRIPT_PATH/report/view
 	fi
 	parse_args $@
-	echo "~~~~~~~~~~~~~~~~~~~~~~~~~"
 	cleanup_network_interface
 	echo "tests are finished"
 	return 0

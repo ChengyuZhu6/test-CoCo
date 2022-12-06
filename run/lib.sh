@@ -1064,7 +1064,6 @@ cleanup_network_interface() {
 
     # [ "$FLANNEL" != "" ] && echo "$FLANNEL doesn't clean up"
     # [ "$CNI" != "" ] && echo "$CNI doesn't clean up"
-    echo "###################"
     return 0
 }
 
@@ -1195,9 +1194,7 @@ reset_runtime() {
     kubectl delete -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
 
     kubectl delete -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-    echo "start deleting k8s" >&3
     kubeadm reset -f
-    echo "deleted k8s" >&3
     # if [ -f /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf ]; then
     #     rm /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf
     #     systemctl daemon-reload
