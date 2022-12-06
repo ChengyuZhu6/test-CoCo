@@ -39,7 +39,6 @@ parse_args() {
 
 	while getopts "uestabmiopfchd :" opt; do
 		case $opt in
-
 		u)
 			run_operator_install
 			run_multiple_pod_spec_and_images_config
@@ -67,7 +66,6 @@ parse_args() {
 			run_measured_boot_image_config
 			run_operator_uninstall
 			;;
-
 		m) ;;
 
 		i) ;;
@@ -76,7 +74,6 @@ parse_args() {
 			run_operator_uninstall
 			;;
 		d) ;;
-
 		p) ;;
 		f)
 			run_operator_install
@@ -107,6 +104,7 @@ parse_args() {
 			;;
 		esac
 	done
+	echo "!!!!!!!!!!!!!!!!"
 	return 0
 	# echo $tests_config
 }
@@ -410,10 +408,8 @@ main() {
 	# echo $(gen_clean_arch)
 	# rm -r $GOPATH/src/github.com/operator
 	# clean_up
-
-	echo "tests are finished" >&3
 	cleanup_network_interface
-	echo "tests are finished" >&3
+	echo "tests are finished" 
 	# return 0
 }
 
