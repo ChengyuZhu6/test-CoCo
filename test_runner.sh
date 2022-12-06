@@ -9,7 +9,7 @@ tests_passing=""
 tests_config=""
 tests_flag=""
 source $SCRIPT_PATH/run/lib.sh
-source $SCRIPT_PATH/run/cc_deploy.sh
+#source $SCRIPT_PATH/run/cc_deploy.sh
 source $SCRIPT_PATH/setup/install_encrypt_tools.sh
 
 usage() {
