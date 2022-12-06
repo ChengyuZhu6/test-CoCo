@@ -107,6 +107,7 @@ parse_args() {
 			;;
 		esac
 	done
+	return 0
 	# echo $tests_config
 }
 generate_tests() {
@@ -409,6 +410,8 @@ main() {
 	# echo $(gen_clean_arch)
 	# rm -r $GOPATH/src/github.com/operator
 	# clean_up
+
+	echo "tests are finished" >&3
 	cleanup_network_interface
 	echo "tests are finished" >&3
 	# return 0

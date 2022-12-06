@@ -1061,6 +1061,7 @@ cleanup_network_interface() {
 
     [ "$FLANNEL" != "" ] && echo "$FLANNEL doesn't clean up"
     [ "$CNI" != "" ] && echo "$CNI doesn't clean up"
+    return 0
 }
 
 delete_stale_kata_resource() {
