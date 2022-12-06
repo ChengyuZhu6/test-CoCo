@@ -107,7 +107,7 @@ parse_args() {
 			;;
 		esac
 	done
-	echo $tests_config
+	# echo $tests_config
 }
 generate_tests() {
 	local base_config="$TEST_COCO_PATH/../templates/multiple_pod_spec.template"
