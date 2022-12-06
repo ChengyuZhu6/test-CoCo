@@ -410,7 +410,7 @@ main() {
 	# rm -r $GOPATH/src/github.com/operator
 	# clean_up
 	cleanup_network_interface
-	echo "tests are finished"
+	echo "tests are finished" >&3
 	# return 0
 }
 
