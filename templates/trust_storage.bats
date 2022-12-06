@@ -1,7 +1,6 @@
 #!/usr/bin/env bats
 
 load ../run/lib.sh
-load ../run/cc_deploy.sh
 
 test_tag="[cc][agent][kubernetes][containerd]"
 

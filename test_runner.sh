@@ -198,7 +198,7 @@ run_signed_image_config() {
 			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		done
 	done
-	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
+	echo -e "load ../run/lib.sh \n  \n read_config" | tee -a $new_pod_configs >/dev/null
 	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/signed_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
@@ -213,7 +213,7 @@ run_cosigned_image_config() {
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tests/cosigned_image.bats"
 	local str="Test_cosigned_image"
-	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
+	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
@@ -251,7 +251,7 @@ run_encrypted_image_config() {
 			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		done
 	done
-	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
+	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 
 	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
@@ -270,7 +270,7 @@ run_offline_encrypted_image_config() {
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tests/offline_encrypted_image.bats"
 	local str="Test_offline_encrypted_image"
-	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
+	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
@@ -295,7 +295,7 @@ run_measured_boot_image_config() {
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tests/measured_boot.bats"
 	local str="Test_measured_boot"
-	echo -e "load ../run/lib.sh \n load ../run/cc_deploy.sh \n read_config" | tee -a $new_pod_configs >/dev/null
+	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
