@@ -1190,8 +1190,9 @@ reset_runtime() {
     kubectl delete -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
 
     kubectl delete -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-    echo "delete k8s" >&3
+    echo "start deleting k8s" >&3
     kubeadm reset -f
+    echo "deleted k8s" >&3
     # if [ -f /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf ]; then
     #     rm /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf
     #     systemctl daemon-reload
