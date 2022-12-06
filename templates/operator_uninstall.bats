@@ -3,6 +3,6 @@ load ../run/cc_deploy.sh
 @test "Test uninstall operator" {
 	#skip
 	run reset_runtime
-	[ "$status" -ne 0 ]
+	[ "$status" -ge 1 ]
 	[ "$output" = "foo: no such file 'nonexistent_filename'" ]
 }
