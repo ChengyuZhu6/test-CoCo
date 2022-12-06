@@ -2,8 +2,9 @@
 
 ## /usr/bin/env bash
 
-readonly op_ns="confidential-containers-system"
+
 source $(pwd)/run/common.bash
+readonly op_ns="confidential-containers-system"
 wait_for_process() {
     wait_time="$1"
     sleep_time="$2"
