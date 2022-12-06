@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-set -o errexit
-set -o nounset
-set -o pipefail
+# set -o errexit
+# set -o nounset
+# set -o pipefail
 SCRIPT_PATH=$(pwd)
 script_name=$(basename "$0")
 tests_passing=""
