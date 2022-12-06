@@ -106,7 +106,6 @@ parse_args() {
 	done
 	echo "!!!!!!!!!!!!!!!!"
 	return 0
-	# echo $tests_config
 }
 generate_tests() {
 	local base_config="$TEST_COCO_PATH/../templates/multiple_pod_spec.template"
@@ -405,12 +404,10 @@ main() {
 		mkdir -p $SCRIPT_PATH/report/view
 	fi
 	parse_args $@
-	# echo $(gen_clean_arch)
-	# rm -r $GOPATH/src/github.com/operator
-	# clean_up
+	echo "~~~~~~~~~~~~~~~~~~~~~~~~~"
 	cleanup_network_interface
-	echo "tests are finished" 
-	# return 0
+	echo "tests are finished"
+	return 0
 }
 
 main "$@"
