@@ -313,7 +313,7 @@ run_measured_boot_image_config() {
 print_image() {
 	IMAGES=($1)
 	for IMAGE in "${IMAGES[@]}"; do
-		echo "    $IMAGE $(docker image ls | grep $IMAGE | head -1 | awk '{print $7}')"
+		echo "    $IMAGE $(docker image ls | grep $IMAGE |grep -v $IMAGE-| head -1 | awk '{print $7}')"
 	done
 }
 setup_env() {
