@@ -30,7 +30,7 @@ test_pod_for_ccruntime() {
     for pod in cc-operator-daemon-install cc-operator-pre-install-daemon; do
         cmd="kubectl get pods -n "$op_ns" --no-headers |"
         cmd+="egrep -q ${pod}.*'\<Running\>'"
-        if ! wait_for_process 300 30 "$cmd"; then
+        if ! wait_for_process 180 30 "$cmd"; then
             echo "ERROR: $pod pod is not running"
             return 1
         fi
@@ -62,11 +62,11 @@ reset_runtime() {
 
     kubectl delete -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
     kubeadm reset -f
-    if [ -f /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf ]; then
-        rm /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf
-        systemctl daemon-reload
-        systemctl restart containerd
-    fi
+    # if [ -f /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf ]; then
+    #     rm /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf
+    #     systemctl daemon-reload
+    #     systemctl restart containerd
+    # fi
     # rm -r $GOPATH/src/github.com/operator-${OPERATOR_VERSION}
     # REGISTRY_CONTAINER=$(docker ps -a | grep "registry" | awk '{print $1}')
     # if [ -n "$REGISTRY_CONTAINER" ]; then
