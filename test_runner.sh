@@ -143,7 +143,7 @@ run_multiple_pod_spec_and_images_config() {
 				for memsize in ${MEMCONFIG[@]}; do
 					for podnum in ${PODNUMCONFIG[@]}; do
 						cat "$(generate_tests ci-$image $image_size $runtimeclass $podnum $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
-						tests_passing+="|${str} ci-$image $image_size $runtimeclass $podnum ${cpunums} ${memsize}GB"
+						tests_passing+="|${str} ci-$image $image_size $runtimeclass ${podnum}PODs ${cpunums}CPUs ${memsize}GB"
 					done
 				done
 			done
