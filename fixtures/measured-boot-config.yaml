@@ -3,8 +3,8 @@ kind: Pod
 metadata:
   name:  measured-boot-cc
 spec:
-  runtimeClassName: $RUNTIMECLASSNAME
+  runtimeClassName: kata-qemu
   containers:
-  - name: $IMAGE
-    image: $REGISTRTYIMAGE
+  - name: ubuntu
+    image: quay.io/prometheus/busybox:latest
     imagePullPolicy: Always

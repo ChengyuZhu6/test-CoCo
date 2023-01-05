@@ -152,13 +152,13 @@ init_kubeadm() {
     #kubectl get nodes
     kubectl apply -f /opt/flannel/kube-flannel.yml
     kubectl taint nodes --all node-role.kubernetes.io/master-
-    install_cc
+    #install_cc
     if [ $? -eq 1 ]; then
         echo "ERROR: deploy cc runtime falied"
         return 1
     fi
 }
-# init_kubeadm
+init_kubeadm
 # main "$@"
 # reset_runtime
 # install_runtime

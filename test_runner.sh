@@ -62,11 +62,15 @@ parse_args() {
 		n) ;;
 
 		b)
-			run_operator_install
+			run_operator_install_measured_boot
 			run_measured_boot_image_config
 			run_operator_uninstall
 			;;
-		m) ;;
+		m)
+			run_operator_install
+			run_auth_registry_image_config
+			run_operator_uninstall
+			;;
 
 		i) ;;
 		o)
@@ -118,6 +122,12 @@ run_operator_install() {
 	tests_passing="Test install operator"
 	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../templates/operator_install.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/operator_install.xml
+}
+run_operator_install_measured_boot() {
+	tests_passing="Test install operator"
+	echo "$(bats -f "$tests_passing" \
+		"$TEST_COCO_PATH/../templates/operator_install_measure_boot.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/operator_install.xml
 }
 run_operator_uninstall() {
@@ -296,24 +306,47 @@ run_measured_boot_image_config() {
 	local new_pod_configs="$TEST_COCO_PATH/../tests/measured_boot.bats"
 	local str="Test_measured_boot"
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
-	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		docker pull $image
-		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
-		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/measured_boot.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
-		done
-	done
+	docker pull busybox
+	image_size=$(docker image ls | grep "busybox" | head -1 | awk '{print $7}')
+	# for runtimeclass in ${RUNTIMECLASS[@]}; do
+	runtimeclass="kata-qemu"
+		cat "$(generate_tests_measured_boot_image "$TEST_COCO_PATH/../templates/measured_boot.template" busybox $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+		tests_passing+="|${str} busybox $image_size $runtimeclass"
+		tests_passing+="|${str}_failed busybox $image_size $runtimeclass"
+	# done
 	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/measured_boot.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tests/*
 	rm -rf $TEST_COCO_PATH/../fixtures/measured-boot-config.yaml.in.*
 }
+run_auth_registry_image_config() {
+	test_pod_for_ccruntime
+	if [ $? -eq 1 ]; then
+		echo "ERROR: cc runtimes are not deployed"
+		return 1
+	fi
+	local new_pod_configs="$TEST_COCO_PATH/../tests/auth_registry.bats"
+	local str="Test_auth_registry"
+	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
+	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
+		docker pull $image
+		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
+		for runtimeclass in ${RUNTIMECLASS[@]}; do
+			cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/auth_registry.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
+		done
+	done
+	echo "$(bats -f "$tests_passing" \
+		"$TEST_COCO_PATH/../tests/auth_registry.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	rm -rf $TEST_COCO_PATH/../tests/*
+	rm -rf $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in.*
+}
 print_image() {
 	IMAGES=($1)
 	for IMAGE in "${IMAGES[@]}"; do
-		echo "    $IMAGE $(docker image ls | grep $IMAGE |grep -v $IMAGE-| head -1 | awk '{print $7}')"
+		echo "    $IMAGE $(docker image ls | grep $IMAGE | grep -v $IMAGE- | head -1 | awk '{print $7}')"
 	done
 }
 setup_env() {
@@ -381,7 +414,7 @@ main() {
 	echo -e "Common Cloud Native projects: TODO"
 	echo -e "\n"
 	echo -e "-------Install Depedencies:-------\n"
-	setup_env
+	# setup_env
 	echo "--------Operator Version--------"
 	OPERATOR_VERSION=$(jq -r .file.operatorVersion $SCRIPT_PATH/config/test_config.json)
 	echo "Operator Version: $OPERATOR_VERSION"

@@ -1,10 +1,24 @@
 
 @test "Test_measured_boot $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
-		skip
+		#skip
 		set_runtimeclass_config $RUNTIMECLASSNAME
 		switch_measured_rootfs_verity_scheme dm-verity
-		pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/measured-boot-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE" )"
-		unencrypted_unsigned_image_from_unprotected_registry $pod_config
+		add_kernel_params "agent.https_proxy=$HTTPS_PROXY"
+		add_kernel_params "agent.no_proxy=$NO_PROXY"
+		pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/measured-boot-config.yaml.in "busybox" "$RUNTIMECLASSNAME" "quay.io/prometheus/busybox:latest" )"
+		pull_encrypted_image_inside_guest_with_decryption_key $pod_config
+		rm $pod_config
+		switch_measured_rootfs_verity_scheme none
+}
+
+@test "Test_measured_boot_failed $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
+		#skip
+		set_runtimeclass_config $RUNTIMECLASSNAME
+		switch_measured_rootfs_verity_scheme dm-verity
+		get_certs_from_remote
+		$TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
+		pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/measured-boot-config.yaml.in "busybox" "$RUNTIMECLASSNAME" "quay.io/prometheus/busybox:latest" )"
+		assert_pod_fail $pod_config
 		rm $pod_config
 		switch_measured_rootfs_verity_scheme none
 }

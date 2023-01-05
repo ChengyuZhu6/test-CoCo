@@ -1,5 +1,4 @@
 source ./run/lib.sh
-source ./run/cc_deploy.sh
 
 test_tag="[cc][agent][kubernetes][containerd]"
 
@@ -9,19 +8,19 @@ setup() {
 }
 new_pod_config() {
 
-    local base_config="$1"
-    local image="$2"
-    local runtimeclass="$3"
-    local registryimage="$4"
-    local pod_num="$5"
-    local cpu_num="$6"
-    local mem_size="$7"
-    local new_config=$(mktemp "$TEST_COCO_PATH/../fixtures/$(basename ${base_config}).XXX")
-    IMAGE="$image" RUNTIMECLASSNAME="$runtimeclass" REGISTRTYIMAGE="$registryimage" NUM="$pod_num" LIMITCPU="$cpu_num" REQUESTCPU="$cpu_num" LIMITMEM="$mem_size" REQUESTMEM="$mem_size" envsubst <"$base_config" >"$new_config"
-    echo "$new_config"
+	local base_config="$1"
+	local image="$2"
+	local runtimeclass="$3"
+	local registryimage="$4"
+	local pod_num="$5"
+	local cpu_num="$6"
+	local mem_size="$7"
+	local new_config=$(mktemp "$TEST_COCO_PATH/../fixtures/$(basename ${base_config}).XXX")
+	IMAGE="$image" RUNTIMECLASSNAME="$runtimeclass" REGISTRTYIMAGE="$registryimage" NUM="$pod_num" LIMITCPU="$cpu_num" REQUESTCPU="$cpu_num" LIMITMEM="$mem_size" REQUESTMEM="$mem_size" envsubst <"$base_config" >"$new_config"
+	echo "$new_config"
 }
 Test_install_operator() {
-	install_runtime
+	init_kubeadm
 	echo "Prepare containerd for Confidential Container"
 
 	read_config
@@ -31,8 +30,8 @@ Test_install_operator() {
 	add_kernel_params "agent.log=debug"
 	add_kernel_params "debug_console_enabled=true"
 	# run_registry
-	get_certs_from_remote
-	$TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
+	# get_certs_from_remote
+	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
 }
 Test_unencrypted_unsigned_image() {
 
@@ -127,8 +126,8 @@ Test_signed_image() {
 }
 Test_encrypted_image() {
 
-	 generate_encrypted_image
-	 exit 0
+	generate_encrypted_image
+	exit 0
 	# VERDICTDID=$(ps ux | grep "verdictd" | grep -v "grep" | awk '{print $2}')
 	# if [ "$VERDICTDID" == "" ]; then
 	# 	verdictd --listen 0.0.0.0:50000 --mutual >/dev/null 2>&1 &
@@ -186,10 +185,18 @@ Test_encrypted_image_offline() {
 }
 Test_measured_boot_image() {
 	switch_measured_rootfs_verity_scheme dm-verity
-	cp_to_guest_img "etc" "$TEST_COCO_PATH/../config/offline-agent-config.toml"
-	unencrypted_signed_image_from_unprotected_registry $TEST_COCO_PATH/../fixtures/unsigned-unprotected-pod-config.yaml
+	add_kernel_params "agent.https_proxy=http://child-prc.intel.com:913"
+	add_kernel_params "agent.no_proxy=*.sh.intel.com,10.*"
+	# cp_to_guest_img "etc" "$TEST_COCO_PATH/../config/offline-agent-config.toml"
+	pull_encrypted_image_inside_guest_with_decryption_key $TEST_COCO_PATH/../fixtures/measured-boot-config.yaml
 }
-
+Test_auth_image() {
+	set_runtimeclass_config kata-qemu
+	setup_credentials_files "quay.io/kata-containers/confidential-containers-auth"
+	pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in "confidential-containers-auth" "$RUNTIMECLASSNAME" "quay.io/kata-containers/confidential-containers-auth:test")"
+	unencrypted_unsigned_image_from_unprotected_registry $pod_config
+	rm $pod_config
+}
 teardown() {
 
 	restore
@@ -214,14 +221,19 @@ tests() {
 	# pull_image
 	# curl https://zcy-Z390-AORUS-MASTER.sh.intel.com:443/v2/_catalog
 	# skopeo list-tags docker://zcy-Z390-AORUS-MASTER.sh.intel.com/nginx
-	# cosign sign --key cosign.key zcy-Z390-AORUS-MASTER.sh.intel.com/redis:latest
+	# cosign sign --key cosign.key ngcn-registry.sh.intel.com/ci-ubuntu:latest
 	# cosign verify --key cosign.pub $IMAGE_URI
+	IMAGE_DIGEST=ngcn-registry.sh.intel.com/cosigned/ci-ubuntu-test:cosigned@$(docker images --digests | grep "ci-ubuntu-test" | grep cosigned | awk '{print $3}' | sed -n "1,1p")
 	skopeo --insecure-policy copy --sign-passphrase-file ./signed/passwd.txt --sign-by intel@intel.com docker://docker.io/nginx:latest docker://zcy-Z390-AORUS-MASTER.sh.intel.com/nginx:signed
 }
 main() {
 	setup
 	read_config
-	Test_unencrypted_unsigned_image
+	# Test_auth_image
+	# Test_install_operator
+	Test_measured_boot_image
+	# reset_runtime
+	# Test_unencrypted_unsigned_image
 	# run_registry
 	# remove_kernel_param "agent.enable_signature_verification"
 	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c

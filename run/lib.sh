@@ -195,6 +195,28 @@ kubernetes_create_cc_pod() {
     #     return 1
     # fi
 }
+kubernetes_create_cc_pod_tests() {
+    local config_file="$1"
+    local pod_name=""
+
+    if [ ! -f "${config_file}" ]; then
+        echo "Pod config file '${config_file}' does not exist"
+        return 1
+    fi
+
+    kubectl apply -f ${config_file}
+    if ! pod_name=$(kubectl get pods -o jsonpath='{.items..metadata.name}'); then
+        echo "Failed to create the pod"
+        return 1
+    fi
+
+    if ! kubernetes_wait_cc_pod_be_ready "$pod_name"; then
+        # TODO: run this command for debugging. Maybe it should be
+        #       guarded by DEBUG=true?
+        kubectl get pods "$pod_name"
+        return 1
+    fi
+}
 enable_agent_console() {
 
     sudo sed -i -e 's/^# *\(debug_console_enabled\).*=.*$/\1 = true/g' \
@@ -293,7 +315,7 @@ assert_pod_fail() {
     echo "In assert_pod_fail: "$container_config
 
     echo "Attempt to create the container but it should fail"
-    ! kubernetes_create_cc_pod "$container_config" || /bin/false
+    ! kubernetes_create_cc_pod_tests "$container_config" || /bin/false
 }
 checkout_pod_yaml() {
     pod_config=$1
@@ -489,10 +511,7 @@ EOF
     echo $offline_kbs_id
     kill -9 $offline_kbs_id
 }
-test_descryption_eaa_kbc() {
-    local img=$1
 
-}
 setup_eaa_kbc_agent_config_in_guest() {
     local rootfs_agent_config="/etc/agent-config.toml"
 
@@ -523,6 +542,15 @@ EOF
     # setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.239.159.53:50000"
     # setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.112.240.208:50000"
 }
+setup_credentials_files() {
+    add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
+
+    local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
+    local offline_new_config="$TEST_COCO_PATH/../tests/aa-offline_fs_kbc-resources.json"
+    # auth_json=$(REGISTRY=$1 CREDENTIALS="${REGISTRY_CREDENTIAL_ENCODED}" envsubst <"$TEST_COCO_PATH/../config/auth.json.in" | base64 -w 0)
+    # CREDENTIAL="${auth_json}" envsubst <"$offline_base_config" >"${offline_new_config}"
+    cp_to_guest_img "etc" "${offline_new_config}"
+}
 setup_offline_decryption_files_in_guest() {
     add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
     # add_kernel_params "agent.config_file=/etc/offline-agent-config.toml"
@@ -535,7 +563,7 @@ setup_offline_decryption_files_in_guest() {
     local c_k_b="$(cat $TEST_COCO_PATH/../certs/cosign.pub | base64)"
     local cosign_key_base64=$(echo $c_k_b | tr -d '\n' | tr -d ' ')
     POLICY_BASE64="$policy_base64" COSIGN_KEY_BASE64="$cosign_key_base64" envsubst <"$offline_base_config" >"$offline_new_config"
-    cp_to_guest_img "etc" "$TEST_COCO_PATH/../tests/aa-offline_fs_kbc-resources.json"
+    cp_to_guest_img "etc" "$offline_new_config"
 }
 kubernetes_create_ssh_demo_pod() {
     kubectl apply -f "$1" && pod=$(kubectl get pods -o jsonpath='{.items..metadata.name}') && kubectl wait --timeout=120s --for=condition=ready pods/$pod
@@ -604,6 +632,14 @@ generate_tests_encrypted_image() {
     local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
 
     IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" pod_config="\$pod_config" test_coco_path="\${TEST_COCO_PATH}" VERDICTDID="\$VERDICTDID" envsubst <"$base_config" >"$new_config"
+
+    echo "$new_config"
+}
+generate_tests_measured_boot_image() {
+    local base_config=$1
+    local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
+
+    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" HTTPS_PROXY="$https_proxy" NO_PROXY="$no_proxy" pod_config="\$pod_config" test_coco_path="\${TEST_COCO_PATH}" envsubst <"$base_config" >"$new_config"
 
     echo "$new_config"
 }
@@ -1186,7 +1222,8 @@ remove_flannel() {
 reset_runtime() {
     OPERATOR_VERSION=$(jq -r .file.operatorVersion $TEST_COCO_PATH/../config/test_config.json)
     export KUBECONFIG=/etc/kubernetes/admin.conf
-    kubectl delete -f https://raw.githubusercontent.com/confidential-containers/operator/main/config/samples/ccruntime.yaml
+    kubectl delete -f $TEST_COCO_PATH/../ccruntime.yaml
+    # kubectl delete -f https://raw.githubusercontent.com/confidential-containers/operator/main/config/samples/ccruntime.yaml
     # kubectl delete -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/config/samples/ccruntime.yaml
     # kubectl apply -f https://raw.githubusercontent.com/confidential-containers/operator/main/deploy/deploy.yaml
 
@@ -1231,7 +1268,8 @@ install_cc() {
         return 1
     fi
     # sleep 1
-    kubectl apply -f https://raw.githubusercontent.com/confidential-containers/operator/main/config/samples/ccruntime.yaml
+    kubectl apply -f $TEST_COCO_PATH/../ccruntime.yaml
+    # kubectl apply -f https://raw.githubusercontent.com/confidential-containers/operator/main/config/samples/ccruntime.yaml
     # kubectl apply -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/config/samples/ccruntime.yaml
     test_pod_for_ccruntime
     if [ $? -eq 1 ]; then
@@ -1252,6 +1290,11 @@ install_runtime() {
     # iptables -P FORWARD ACCEPT
     kubeadm init --cri-socket /run/containerd/containerd.sock --pod-network-cidr=10.244.0.0/16 --image-repository registry.cn-hangzhou.aliyuncs.com/google_containers
     export KUBECONFIG=/etc/kubernetes/admin.conf
+    local label="node-role.kubernetes.io/control-plane-"
+    if [ ! kubectl get node "$(hostname)" -o jsonpath='{.metadata.labels}' |
+        grep -q "$label" ]; then
+        kubectl label node "$(hostname)" "$label="
+    fi
     # kubectl taint nodes --all node-role.kubernetes.io/control-plane-
     kubectl taint nodes --all node-role.kubernetes.io/master-
     # exit 0
@@ -1281,6 +1324,12 @@ init_kubeadm() {
     #kubectl get nodes
     kubectl apply -f /opt/flannel/kube-flannel.yml
     kubectl taint nodes --all node-role.kubernetes.io/master-
+    local label="node-role.kubernetes.io/control-plane"
+    if [ ! $(kubectl get node "$(hostname| tr A-Z a-z)" -o=json|jq -r ".metadata.labels" |
+        grep -q "$label") ]; then
+        # kubectl label node "$(hostname| tr A-Z a-z)" "$label="
+        kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+    fi
     install_cc
     if [ $? -eq 1 ]; then
         echo "ERROR: deploy cc runtime falied"

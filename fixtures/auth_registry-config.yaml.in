@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name:  measured-boot-cc
+  name:  auth-registry-cc
 spec:
   runtimeClassName: $RUNTIMECLASSNAME
   containers:
   - name: $IMAGE
-    image: $REGISTRTYIMAGE
+    image:  $REGISTRTYIMAGE
     imagePullPolicy: Always

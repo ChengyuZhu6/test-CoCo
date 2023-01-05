@@ -12,3 +12,4 @@
 	kubernetes_delete_cc_pod_if_exists $pod_id || true
 	rm $pod_config
 }
+skopeo --insecure-policy copy --sign-passphrase-file passwd-test.txt --sign-by 57B1D98278A1C9F66A758B8E521B3840F6D118CC docker://ngcn-registry.sh.intel.com/ci-ubuntu:latest  docker://ngcn-registry.sh.intel.com/ci-ubuntu:signed-test

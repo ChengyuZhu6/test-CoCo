@@ -1,0 +1,8 @@
+
+@test "Test_auth_registry $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
+		set_runtimeclass_config $RUNTIMECLASSNAME
+		setup_credentials_files "quay.io/kata-containers/confidential-containers-auth"
+		pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in "confidential-containers-auth" "$RUNTIMECLASSNAME" "quay.io/kata-containers/confidential-containers-auth:test" )"
+		unencrypted_unsigned_image_from_unprotected_registry $pod_config
+		rm $pod_config
+}
