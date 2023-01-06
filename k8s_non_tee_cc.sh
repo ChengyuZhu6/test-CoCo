@@ -237,7 +237,7 @@ main() {
 	setup
 	read_config
 	# run_registry
-	Test_install_operator
+	# Test_install_operator
 	Test_auth_image
 	# Test_install_operator
 	# Test_measured_boot_image
