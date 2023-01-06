@@ -614,14 +614,20 @@ init_kubeadm() {
     export KUBECONFIG=/etc/kubernetes/admin.conf
 
     # TODO: if we want to run as a regular user.
-    mkdir -p $HOME/.kube
-    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-    sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    # mkdir -p $HOME/.kube
+    # sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    # sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
     # TODO: wait node to show up
     kubectl get nodes
     kubectl apply -f /opt/flannel/kube-flannel.yml
     kubectl taint nodes --all node-role.kubernetes.io/master-
+    local label="node-role.kubernetes.io/control-plane"
+    if [ ! $(kubectl get node "$(hostname| tr A-Z a-z)" -o=json|jq -r ".metadata.labels" |
+        grep -q "$label") ]; then
+        # kubectl label node "$(hostname| tr A-Z a-z)" "$label="
+        kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+    fi
     install_cc
     if [ $? -eq 1 ]; then
         echo "ERROR: deploy cc runtime falied"

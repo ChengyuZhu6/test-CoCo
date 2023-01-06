@@ -63,13 +63,13 @@ parse_args() {
 
 		b)
 			run_operator_install_measured_boot
-			run_measured_boot_image_config
-			run_operator_uninstall
+			# run_measured_boot_image_config
+			# run_operator_uninstall
 			;;
 		m)
-			run_operator_install
-			run_auth_registry_image_config
-			run_operator_uninstall
+			# run_operator_install
+			# run_auth_registry_image_config
+			# run_operator_uninstall
 			;;
 
 		i) ;;

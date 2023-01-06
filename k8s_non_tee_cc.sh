@@ -191,10 +191,17 @@ Test_measured_boot_image() {
 	pull_encrypted_image_inside_guest_with_decryption_key $TEST_COCO_PATH/../fixtures/measured-boot-config.yaml
 }
 Test_auth_image() {
-	set_runtimeclass_config kata-qemu
-	setup_credentials_files "quay.io/kata-containers/confidential-containers-auth"
-	pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in "confidential-containers-auth" "$RUNTIMECLASSNAME" "quay.io/kata-containers/confidential-containers-auth:test")"
-	unencrypted_unsigned_image_from_unprotected_registry $pod_config
+	set_runtimeclass_config kata
+	switch_measured_rootfs_verity_scheme none
+	switch_image_service_offload on
+	add_kernel_params "agent.https_proxy=http://child-prc.intel.com:913"
+	add_kernel_params "agent.no_proxy=*.sh.intel.com,10.*"
+	echo "$RUNTIMECLASSNAME"
+	setup_credentials_files "quay.io/kata-containers/confidential-containers-auth:test"
+	pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in "auth" "kata" "docker.io/zcy1234/busybox:latest")"
+	# pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in "auth" "kata" "quay.io/prometheus/busybox:latest")"
+
+	pull_encrypted_image_inside_guest_with_decryption_key $pod_config
 	rm $pod_config
 }
 teardown() {
@@ -229,9 +236,11 @@ tests() {
 main() {
 	setup
 	read_config
-	# Test_auth_image
+	# run_registry
+	Test_install_operator
+	Test_auth_image
 	# Test_install_operator
-	Test_measured_boot_image
+	# Test_measured_boot_image
 	# reset_runtime
 	# Test_unencrypted_unsigned_image
 	# run_registry

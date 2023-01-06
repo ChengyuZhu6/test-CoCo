@@ -544,11 +544,13 @@ EOF
 }
 setup_credentials_files() {
     add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
-
-    local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
+    REGISTRY_CREDENTIAL_ENCODED="emN5MTIzNDp6Y3lzdXJwYXNzMjAyMA=="
+    local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources_test.json.in"
     local offline_new_config="$TEST_COCO_PATH/../tests/aa-offline_fs_kbc-resources.json"
     # auth_json=$(REGISTRY=$1 CREDENTIALS="${REGISTRY_CREDENTIAL_ENCODED}" envsubst <"$TEST_COCO_PATH/../config/auth.json.in" | base64 -w 0)
-    # CREDENTIAL="${auth_json}" envsubst <"$offline_base_config" >"${offline_new_config}"
+    auth_json=$(base64 -w 0 $TEST_COCO_PATH/../config/auth.json)
+    echo "$auth_json"
+    CREDENTIAL="${auth_json}" envsubst <"$offline_base_config" >"${offline_new_config}"
     cp_to_guest_img "etc" "${offline_new_config}"
 }
 setup_offline_decryption_files_in_guest() {
@@ -751,7 +753,8 @@ create_image_size() {
 }
 #generate .crt and .key
 generate_crt() {
-    openssl req -newkey rsa:4096 -nodes -sha256 -keyout $TEST_COCO_PATH/../certs/domain.key -addext "subjectAltName = ${TYPE_NAME}:${REGISTRY_NAME}" -x509 -days 365 -out $TEST_COCO_PATH/../certs/domain.crt <<ESXU
+    local LOCAL_REGISTRY_NAME="zcy-Z390-AORUS-MASTER.sh.intel.com"
+    openssl req -newkey rsa:4096 -nodes -sha256 -keyout $TEST_COCO_PATH/../certs/domain.key -addext "subjectAltName = ${TYPE_NAME}:${LOCAL_REGISTRY_NAME}" -x509 -days 365 -out $TEST_COCO_PATH/../certs/domain.crt <<ESXU
 12
 
 12
@@ -784,6 +787,7 @@ get_certs_from_remote() {
     pull_image
 }
 run_registry() {
+    local LOCAL_REGISTRY_NAME="zcy-Z390-AORUS-MASTER.sh.intel.com"
     # delete all docker containers and images
     REGISTRY_CONTAINER=$(docker ps -a | grep "registry" | awk '{print $1}')
     if [ -n "$REGISTRY_CONTAINER" ]; then
@@ -792,19 +796,19 @@ run_registry() {
     fi
     generate_crt
     if [ "$OPERATING_SYSTEM_VERSION" == "Ubuntu" ]; then
-        cp $TEST_COCO_PATH/../certs/domain.crt /usr/local/share/ca-certificates/${REGISTRY_NAME}.crt
+        cp $TEST_COCO_PATH/../certs/domain.crt /usr/local/share/ca-certificates/${LOCAL_REGISTRY_NAME}.crt
         update-ca-certificates
     elif [ "$OPERATING_SYSTEM_VERSION" == "CentOS" ]; then
-        cat $TEST_COCO_PATH/../certs/domain.crt >>/etc/pki/ca-trust/source/anchors/${REGISTRY_NAME}.crt
+        cat $TEST_COCO_PATH/../certs/domain.crt >>/etc/pki/ca-trust/source/anchors/${LOCAL_REGISTRY_NAME}.crt
         update-ca-trust
     fi
     # Deploy docker registry
-    docker run -d --restart=always --name $REGISTRY_NAME -v $TEST_COCO_PATH/../certs:/certs \
+    docker run -d --restart=always --name $LOCAL_REGISTRY_NAME -v $TEST_COCO_PATH/../certs:/certs \
         -e REGISTRY_HTTP_ADDR=0.0.0.0:$PORT -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt \
-        -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key -p $PORT:$PORT registry:2
+        -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key -e REGISTRY_BASIC_AUTH="emN5MTIzNDp6Y3lzdXJwYXNzMjAyMAo=" -p $PORT:$PORT registry:2
     systemctl restart docker
-
-    pull_image
+    # docker tag 
+    # pull_image
     # create_image_size
 }
 
@@ -883,7 +887,10 @@ set_runtimeclass_config() {
     "kata-qemu-tdx-eaa-kbc")
         export CURRENT_CONFIG_FILE="configuration-qemu-tdx-eaa-kbc.toml"
         export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image"
-
+        ;;
+    "kata")
+        export CURRENT_CONFIG_FILE="configuration.toml"
+        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
         ;;
     esac
 
