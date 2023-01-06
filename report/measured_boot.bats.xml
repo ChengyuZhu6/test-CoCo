@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuites time="145.993">
-<testsuite name="measured_boot.bats" tests="2" failures="0" errors="0" skipped="0" time="145.993" timestamp="2023-01-05T17:20:10" hostname="zcy-Z390-AORUS-MASTER">
-    <testcase classname="measured_boot.bats" name="Test_measured_boot busybox 4.86MB kata-qemu" time="13.104" />
-    <testcase classname="measured_boot.bats" name="Test_measured_boot_failed busybox 4.86MB kata-qemu" time="132.889" />
-
-</testsuite>
-</testsuites>

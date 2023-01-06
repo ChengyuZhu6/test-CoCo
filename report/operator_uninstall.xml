@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuites time="105.286">
-<testsuite name="operator_uninstall.bats" tests="1" failures="0" errors="0" skipped="0" time="105.286" timestamp="2023-01-05T23:01:15" hostname="zcy-Z390-AORUS-MASTER">
-    <testcase classname="operator_uninstall.bats" name="Test uninstall operator" time="105.286" />
-
-</testsuite>
-</testsuites>
