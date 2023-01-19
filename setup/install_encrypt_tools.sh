@@ -7,7 +7,7 @@ install_skopeo() {
 install_attestation_agent() {
     git clone https://github.com/containers/attestation-agent $GOPATH/src/github.com/attestation-agent
     cd $GOPATH/src/github.com/attestation-agent
-    make KBC=eaa_kbc && make install
+    make KBC=offline_fs_kbc && make install
 }
 install_verdictd() {
     git clone -b 2022-poc https://github.com/jialez0/verdictd $GOPATH/src/github.com/verdictd

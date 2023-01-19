@@ -10,18 +10,16 @@
 			"kata-qemu-tdx"
 		],
 		"eaaTDXRuntimeClass": [
-			"kata-qemu-tdx-eaa-kbc"
+			"kata-qemu-tdx-eaa-kbc",
+			"kata-clh-tdx-eaa-kbc"
 		],
 		"podNum": [
-			"1",
-			"2"
+			"1"
 		],
 		"cpuNum": [
-			"1",
-			"2"
+			"50"
 		],
 		"memSize": [
-			"1",
 			"2"
 		]
 	},
@@ -39,7 +37,11 @@
 			"example8G",
 			"example16G"
 		],
-		"imageLists": [],
+		"imageLists": [
+			"example256M",
+			"example512M",
+			"example1G"
+		],
 		"operatorVersion": "0.2.0"
 	},
 	"certificates": {

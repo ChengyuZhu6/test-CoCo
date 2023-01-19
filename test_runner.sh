@@ -40,8 +40,8 @@ parse_args() {
 	while getopts "uestabmiopfchd :" opt; do
 		case $opt in
 		u)
-			run_operator_install
-			run_multiple_pod_spec_and_images_config
+			# run_operator_install
+			# run_multiple_pod_spec_and_images_config
 			run_operator_uninstall
 			;;
 		e)
@@ -62,14 +62,14 @@ parse_args() {
 		n) ;;
 
 		b)
-			run_operator_install_measured_boot
+			# run_operator_install_measured_boot
 			# run_measured_boot_image_config
-			# run_operator_uninstall
+			run_operator_uninstall
 			;;
 		m)
-			# run_operator_install
-			# run_auth_registry_image_config
-			# run_operator_uninstall
+			run_operator_install
+			run_auth_registry_image_config
+			run_operator_uninstall
 			;;
 
 		i) ;;
@@ -91,14 +91,15 @@ parse_args() {
 			;;
 		d) ;;
 		a)
-			run_operator_install
+			run_operator_install_measured_boot
+			run_measured_boot_image_config
+			move_certs_to_rootfs
 			run_multiple_pod_spec_and_images_config
 			run_encrypted_image_config
 			run_offline_encrypted_image_config
 			run_signed_image_config
 			run_cosigned_image_config
-			run_trust_storage_config
-			run_measured_boot_image_config
+			run_trust_storage_config			
 			run_operator_uninstall
 			;;
 		h) usage 0 ;;
@@ -110,11 +111,14 @@ parse_args() {
 	done
 	return 0
 }
+move_certs_to_rootfs(){
+	get_certs_from_remote
+	$TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
+}
 generate_tests() {
 	local base_config="$TEST_COCO_PATH/../templates/multiple_pod_spec.template"
 	local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
-
-	IMAGE="$1" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$1:$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
+	IMAGE="example" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$(echo $1| tr A-Z a-z):$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
 
 	echo "$new_config"
 }
@@ -145,9 +149,10 @@ run_multiple_pod_spec_and_images_config() {
 	local new_pod_configs="$TEST_COCO_PATH/../tests/multiple_pod_spec_and_images.bats"
 	local str="Test_multiple_pod_spec_and_images"
 	echo -e "load ../run/lib.sh " | tee -a $new_pod_configs >/dev/null
-	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		docker pull $image
-		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
+	for image in ${IMAGE_LISTS[@]}; do
+		# docker pull $image
+		# echo $image
+		image_size=$(docker image ls | grep $(echo ci-$image| tr A-Z a-z) | head -1 | awk '{print $7}')
 		for runtimeclass in ${RUNTIMECLASS[@]}; do
 			for cpunums in ${CPUCONFIG[@]}; do
 				for memsize in ${MEMCONFIG[@]}; do
@@ -436,7 +441,7 @@ main() {
 		mkdir -p $SCRIPT_PATH/report/view
 	fi
 	parse_args $@
-	cleanup_network_interface
+	# cleanup_network_interface
 	echo "tests are finished"
 	return 0
 }

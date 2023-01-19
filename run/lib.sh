@@ -543,8 +543,9 @@ EOF
     # setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.112.240.208:50000"
 }
 setup_credentials_files() {
-    add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
-    REGISTRY_CREDENTIAL_ENCODED="emN5MTIzNDp6Y3lzdXJwYXNzMjAyMA=="
+	add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
+    # setup_eaa_kbc_agent_config_in_guest "offline_fs_kbc::null"
+    # REGISTRY_CREDENTIAL_ENCODED="a2F0YS1jb250YWluZXJzK2NjX2F1dGg6VjFBRkU5UkM0TVQyQTZNR0pCVTIxUFJON1VETkFHMVNMTDJNOVNMUVlLOEE5VExLR09WN04wUlNYNUw0RTgxVA=="
     local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources_test.json.in"
     local offline_new_config="$TEST_COCO_PATH/../tests/aa-offline_fs_kbc-resources.json"
     # auth_json=$(REGISTRY=$1 CREDENTIALS="${REGISTRY_CREDENTIAL_ENCODED}" envsubst <"$TEST_COCO_PATH/../config/auth.json.in" | base64 -w 0)
@@ -736,10 +737,10 @@ create_file_for_size() {
     DOCKERID=$(docker ps | grep alpine | awk '{print $1}')
     echo $DOCKERID
     docker cp ${STORAGE_FILE_D}/file-$file_size$file_unit.txt $DOCKERID:/tmp/
-    docker commit $DOCKERID example$file_size${file_unit,,}
+    docker commit $DOCKERID ci-example$file_size${file_unit,,}
     docker stop $DOCKERID && docker rm $DOCKERID
-    docker tag example$file_size${file_unit,,} $REGISTRY_NAME/example$file_size${file_unit,,}:$VERSION
-    docker push $REGISTRY_NAME/example$file_size${file_unit,,}:$VERSION
+    docker tag ci-example$file_size${file_unit,,} $REGISTRY_NAME/ci-example$file_size${file_unit,,}:$VERSION
+    docker push $REGISTRY_NAME/ci-example$file_size${file_unit,,}:$VERSION
 }
 create_image_size() {
     for IMAGE in ${IMAGE_LISTS[@]}; do
@@ -784,7 +785,8 @@ get_certs_from_remote() {
         update-ca-trust
     fi
     set_docker_certs
-    pull_image
+    # pull_image
+    create_image_size
 }
 run_registry() {
     local LOCAL_REGISTRY_NAME="zcy-Z390-AORUS-MASTER.sh.intel.com"
@@ -1235,8 +1237,8 @@ reset_runtime() {
     # kubectl apply -f https://raw.githubusercontent.com/confidential-containers/operator/main/deploy/deploy.yaml
 
     # kubectl delete -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/deploy/deploy.yaml
-    kubectl delete -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
-
+    # kubectl delete -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
+    kubectl delete -k github.com/confidential-containers/operator/config/default 
     kubectl delete -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
     kubeadm reset -f
     # if [ -f /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf ]; then
@@ -1267,7 +1269,8 @@ install_cc() {
 
     # sed -i 's/latest/v0.1.0/g' $GOPATH/src/github.com/operator-0.1.0/deploy/deploy.yaml
     # kubectl apply -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/deploy/deploy.yaml
-    kubectl apply -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
+    # kubectl apply -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
+    kubectl apply -k github.com/confidential-containers/operator/config/default 
     # kubectl taint nodes --all node-role.kubernetes.io/control-plane-
     test_pod_for_deploy
     if [ $? -eq 1 ]; then
