@@ -22,7 +22,7 @@ new_pod_config() {
 	echo "$new_config"
 }
 Test_install_operator() {
-	# init_kubeadm
+	init_kubeadm
 	echo "Prepare containerd for Confidential Container"
 
 	read_config
@@ -151,6 +151,7 @@ Test_encrypted_image() {
 
 Test_uninstall_operator() {
 	reset_runtime
+
 }
 Test_cosign_image() {
 	local IMAGE="nginx"
@@ -261,7 +262,8 @@ main() {
 	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
 	# pull_image
 	# Test_encrypted_image_offline
-	# Test_uninstall_operator
+	Test_uninstall_operator
+	cleanup_network_interface
 	# teardown
 }
 main "$@"
