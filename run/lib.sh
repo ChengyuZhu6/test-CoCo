@@ -214,6 +214,7 @@ kubernetes_create_cc_pod_tests() {
         # TODO: run this command for debugging. Maybe it should be
         #       guarded by DEBUG=true?
         kubectl get pods "$pod_name"
+        kubernetes_delete_cc_pod_if_exists  "$pod_name"
         return 1
     fi
 }
@@ -786,7 +787,7 @@ get_certs_from_remote() {
     fi
     set_docker_certs
     # pull_image
-    create_image_size
+    # create_image_size
 }
 run_registry() {
     local LOCAL_REGISTRY_NAME="zcy-Z390-AORUS-MASTER.sh.intel.com"
@@ -1231,14 +1232,15 @@ remove_flannel() {
 reset_runtime() {
     OPERATOR_VERSION=$(jq -r .file.operatorVersion $TEST_COCO_PATH/../config/test_config.json)
     export KUBECONFIG=/etc/kubernetes/admin.conf
-    kubectl delete -f $TEST_COCO_PATH/../ccruntime.yaml
+    # kubectl delete -f $TEST_COCO_PATH/../ccruntime.yaml
+    kubectl delete -k github.com/confidential-containers/operator/config/samples/ccruntime/default?ref=v${OPERATOR_VERSION}
     # kubectl delete -f https://raw.githubusercontent.com/confidential-containers/operator/main/config/samples/ccruntime.yaml
     # kubectl delete -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/config/samples/ccruntime.yaml
     # kubectl apply -f https://raw.githubusercontent.com/confidential-containers/operator/main/deploy/deploy.yaml
 
     # kubectl delete -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/deploy/deploy.yaml
-    # kubectl delete -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
-    kubectl delete -k github.com/confidential-containers/operator/config/default 
+    kubectl delete -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
+    # kubectl delete -k github.com/confidential-containers/operator/config/default 
     kubectl delete -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
     kubeadm reset -f
     # if [ -f /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf ]; then
@@ -1269,8 +1271,8 @@ install_cc() {
 
     # sed -i 's/latest/v0.1.0/g' $GOPATH/src/github.com/operator-0.1.0/deploy/deploy.yaml
     # kubectl apply -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/deploy/deploy.yaml
-    # kubectl apply -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
-    kubectl apply -k github.com/confidential-containers/operator/config/default 
+    kubectl apply -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
+    # kubectl apply -k github.com/confidential-containers/operator/config/default 
     # kubectl taint nodes --all node-role.kubernetes.io/control-plane-
     test_pod_for_deploy
     if [ $? -eq 1 ]; then
@@ -1278,7 +1280,8 @@ install_cc() {
         return 1
     fi
     # sleep 1
-    kubectl apply -f $TEST_COCO_PATH/../ccruntime.yaml
+    # kubectl apply -f $TEST_COCO_PATH/../ccruntime.yaml
+    kubectl apply -k github.com/confidential-containers/operator/config/samples/ccruntime/default?ref=v${OPERATOR_VERSION}
     # kubectl apply -f https://raw.githubusercontent.com/confidential-containers/operator/main/config/samples/ccruntime.yaml
     # kubectl apply -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/config/samples/ccruntime.yaml
     test_pod_for_ccruntime

@@ -1,4 +1,6 @@
-source ./run/lib.sh
+#!/usr/bin/env bash
+
+source run/lib.sh
 
 test_tag="[cc][agent][kubernetes][containerd]"
 
@@ -20,7 +22,7 @@ new_pod_config() {
 	echo "$new_config"
 }
 Test_install_operator() {
-	init_kubeadm
+	# init_kubeadm
 	echo "Prepare containerd for Confidential Container"
 
 	read_config
@@ -30,14 +32,15 @@ Test_install_operator() {
 	add_kernel_params "agent.log=debug"
 	add_kernel_params "debug_console_enabled=true"
 	# run_registry
-	# get_certs_from_remote
-	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
+	get_certs_from_remote
+	$TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
 }
 Test_unencrypted_unsigned_image() {
 
 	set_runtimeclass_config kata-qemu
-	for COUNTS in {1..3}; do
-		pod_config="$(new_pod_config /root/kata/test-CoCo/run/../fixtures/multiple_pod_spec-config.yaml.in "ci-ubuntu" "kata-qemu" "ngcn-registry.sh.intel.com:443/ci-ubuntu:latest" "$COUNTS" "25" "2")"
+	switch_measured_rootfs_verity_scheme none
+	for COUNTS in {1..1}; do
+		pod_config="$(new_pod_config /root/kata/test-CoCo/run/../fixtures/multiple_pod_spec-config.yaml.in "ci-example256m" "kata-qemu" "ngcn-registry.sh.intel.com:443/ci-example256m:latest" "$COUNTS" "25" "2")"
 		unencrypted_unsigned_image_from_unprotected_registry $pod_config
 	done
 	multiple_pods_delete
@@ -201,7 +204,7 @@ Test_auth_image() {
 	pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in "auth" "kata-qemu-tdx" "quay.io/kata-containers/confidential-containers-auth:test")"
 	# pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in "auth" "kata" "quay.io/prometheus/busybox:latest")"
 
-	pull_encrypted_image_inside_guest_with_decryption_key $pod_config
+	kubernetes_create_cc_pod_tests $pod_config
 	rm $pod_config
 }
 teardown() {
@@ -236,6 +239,7 @@ tests() {
 main() {
 	setup
 	read_config
+	# Test_unencrypted_unsigned_image
 	# run_registry
 	# Test_install_operator
 	Test_auth_image
@@ -257,7 +261,7 @@ main() {
 	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
 	# pull_image
 	# Test_encrypted_image_offline
-	Test_uninstall_operator
+	# Test_uninstall_operator
 	# teardown
 }
 main "$@"

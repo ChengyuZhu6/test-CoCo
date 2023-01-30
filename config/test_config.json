@@ -42,7 +42,7 @@
 			"example512M",
 			"example1G"
 		],
-		"operatorVersion": "0.2.0"
+		"operatorVersion": "0.3.0"
 	},
 	"certificates": {
 		"type": "DNS",

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites time="141.406">
-<testsuite name="operator_install.bats" tests="1" failures="0" errors="0" skipped="0" time="141.406" timestamp="2023-01-19T22:17:05" hostname="zcy-Z390-AORUS-MASTER">
-    <testcase classname="operator_install.bats" name="Test install operator" time="141.406" />
+<testsuites time="68.242">
+<testsuite name="operator_install.bats" tests="1" failures="0" errors="0" skipped="0" time="68.242" timestamp="2023-01-29T22:32:00" hostname="zcy-Z390-AORUS-MASTER">
+    <testcase classname="operator_install.bats" name="Test install operator" time="68.242" />
 
 </testsuite>
 </testsuites>
