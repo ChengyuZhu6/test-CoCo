@@ -6,5 +6,5 @@ spec:
   runtimeClassName: kata-qemu
   containers:
   - name: auth
-    image:  quay.io/kata-containers/confidential-containers-auth:test
+    image:  docker.io/zcy1234/busybox:latest
     imagePullPolicy: Always
