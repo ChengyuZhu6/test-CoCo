@@ -193,6 +193,12 @@ Test_measured_boot_image() {
 	add_kernel_params "agent.no_proxy=*.sh.intel.com,10.*"
 	# cp_to_guest_img "etc" "$TEST_COCO_PATH/../config/offline-agent-config.toml"
 	pull_encrypted_image_inside_guest_with_decryption_key $TEST_COCO_PATH/../fixtures/measured-boot-config.yaml
+	kubernetes_create_cc_pod_tests $pod_config
+	pod_name=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
+	echo $pod_name
+	kubernetes_delete_cc_pod "$pod_name"
+	rm $pod_config
+	switch_measured_rootfs_verity_scheme none
 }
 Test_auth_image() {
 	set_runtimeclass_config kata-qemu-tdx

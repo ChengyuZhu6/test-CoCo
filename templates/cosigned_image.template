@@ -12,6 +12,6 @@
 	cp_to_guest_img "etc" "${test_coco_path}/../tests/aa-offline_fs_kbc-resources.json"
 	kubernetes_create_cc_pod_tests $pod_config
 	pod_name=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
-	kubernetes_delete_cc_pod_if_exists "$pod_name"
+	kubernetes_delete_cc_pod "$pod_name"
 	rm $pod_config
 }
