@@ -214,10 +214,9 @@ kubernetes_create_cc_pod_tests() {
         # TODO: run this command for debugging. Maybe it should be
         #       guarded by DEBUG=true?
         kubectl get pods "$pod_name"
-        kubernetes_delete_cc_pod_if_exists "$pod_name"
         return 1
     fi
-    kubernetes_delete_cc_pod_if_exists "$pod_name"
+    
 }
 enable_agent_console() {
 
