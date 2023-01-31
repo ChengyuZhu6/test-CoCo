@@ -217,6 +217,7 @@ kubernetes_create_cc_pod_tests() {
         kubernetes_delete_cc_pod_if_exists "$pod_name"
         return 1
     fi
+    kubernetes_delete_cc_pod_if_exists "$pod_name"
 }
 enable_agent_console() {
 
