@@ -866,7 +866,6 @@ set_runtimeclass_config() {
     "kata-qemu")
         export CURRENT_CONFIG_FILE="configuration-qemu.toml"
         export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
-
         ;;
     "kata-clh")
         export CURRENT_CONFIG_FILE="configuration-clh.toml"
@@ -908,13 +907,13 @@ read_config() {
     # export CONFIG_FILES=($(ls -l ${RUNTIME_CONFIG_PATH} | awk '{print $9}'))
     export CURRENT_CONFIG_FILE="configuration-qemu.toml"
     # TDX_STATUS=$(grep -o tdx /proc/cpuinfo)
-    # if [ -z "$TDX_STATUS" ]; then
-    #     export RUNTIMECLASS=$(jq -r '.config.runtimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
-    #     set_runtimeclass_config kata-qemu
-    # else
+    if [ $TDX_STATUS -ge 1 ]; then
         export RUNTIMECLASS=$(jq -r '.config.TDXRuntimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
         set_runtimeclass_config kata-qemu-tdx
-    # fi
+    else
+        export RUNTIMECLASS=$(jq -r '.config.runtimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
+        set_runtimeclass_config kata-qemu
+    fi
     echo "$RUNTIMECLASS"
     export EAATDXRUNTIMECLASS=$(jq -r '.config.eaaTDXRuntimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
     export CPUCONFIG=$(jq -r '.config.cpuNum[]' $TEST_COCO_PATH/../config/test_config.json)

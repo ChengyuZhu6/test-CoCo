@@ -39,8 +39,11 @@ Test_unencrypted_unsigned_image() {
 
 	set_runtimeclass_config kata-qemu
 	switch_measured_rootfs_verity_scheme none
+	switch_image_service_offload on
+	add_kernel_params "agent.https_proxy=http://child-prc.intel.com:913"
+	add_kernel_params "agent.no_proxy=*.sh.intel.com,10.*"
 	for COUNTS in {1..1}; do
-		pod_config="$(new_pod_config /root/kata/test-CoCo/run/../fixtures/multiple_pod_spec-config.yaml.in "ci-example256m" "kata-qemu" "ngcn-registry.sh.intel.com:443/ci-example256m:latest" "$COUNTS" "25" "2")"
+		pod_config="$(new_pod_config /root/kata/test-CoCo/run/../fixtures/multiple_pod_spec-config.yaml.in "ci-ubuntu" "kata-qemu" "docker.io/ubuntu:latest" "$COUNTS" "25" "2")"
 		unencrypted_unsigned_image_from_unprotected_registry $pod_config
 	done
 	multiple_pods_delete
@@ -246,11 +249,18 @@ tests() {
 main() {
 	setup
 	read_config
-	# Test_unencrypted_unsigned_image
+	Test_uninstall_operator
+	exit 0
+	# Test_install_operator
+	# get_certs_from_remote
+	# set_runtimeclass_config kata-qemu
+	# exit 0
+	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
+	Test_unencrypted_unsigned_image
 	# run_registry
 	# Test_install_operator
 	# Test_auth_image
-	Test_signed_image
+	# Test_signed_image
 	# Test_encrypted_image
 	# Test_install_operator
 	# Test_measured_boot_image

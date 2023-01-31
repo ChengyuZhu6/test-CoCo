@@ -113,12 +113,11 @@ parse_args() {
 	return 0
 }
 move_certs_to_rootfs() {
-	if [ -z "$TDX_STATUS" ]; then
-		export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
-	else
-		export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image"
-
-	fi
+	 if [ $TDX_STATUS -ge 1 ]; then
+        set_runtimeclass_config kata-qemu-tdx
+    else
+        set_runtimeclass_config kata-qemu
+    fi
 	echo $ROOTFS_IMAGE_PATH
 	get_certs_from_remote
 	$TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
