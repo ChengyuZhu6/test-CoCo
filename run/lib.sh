@@ -147,13 +147,13 @@ clear_kernel_params() {
 #
 kubernetes_wait_cc_pod_be_ready() {
     local pod_name="$1"
-    local wait_time="${2:-30}"
+    local wait_time="${2:-60}"
 
     kubectl wait --timeout=${wait_time}s --for=condition=ready pods/$pod_name
 }
 kubernetes_wait_cc_pod_be_running() {
     local pod_name="$1"
-    local wait_time="${2:-15}"
+    local wait_time="${2:-30}"
 
     kubectl wait --timeout=${wait_time}s --for=jsonpath='{.status.phase}'=Running pods/$pod_name
 }
