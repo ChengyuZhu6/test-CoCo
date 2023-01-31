@@ -628,7 +628,7 @@ generate_tests_signed_image() {
     local base_config=$1
     local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
 
-    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" pod_config="\$pod_config" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
+    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" pod_config="\$pod_config" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
 
     echo "$new_config"
 }
@@ -644,7 +644,7 @@ generate_tests_measured_boot_image() {
     local base_config=$1
     local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
 
-    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" HTTPS_PROXY="$https_proxy" NO_PROXY="$no_proxy" pod_config="\$pod_config" test_coco_path="\${TEST_COCO_PATH}" envsubst <"$base_config" >"$new_config"
+    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" HTTPS_PROXY="$https_proxy" NO_PROXY="$no_proxy" pod_config="\$pod_config" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" envsubst <"$base_config" >"$new_config"
 
     echo "$new_config"
 }
@@ -652,7 +652,7 @@ generate_tests_offline_encrypted_image() {
     local base_config=$1
     local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
 
-    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" pod_config="\$pod_config" test_coco_path="\${TEST_COCO_PATH}" envsubst <"$base_config" >"$new_config"
+    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" pod_config="\$pod_config" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" envsubst <"$base_config" >"$new_config"
 
     echo "$new_config"
 }
@@ -683,7 +683,7 @@ generate_tests_cosign_image() {
     local c_k_b="$(cat $TEST_COCO_PATH/../certs/cosign.pub | base64)"
     local cosign_key_base64=$(echo $c_k_b | tr -d '\n' | tr -d ' ')
     POLICY_BASE64="$policy_base64" COSIGN_KEY_BASE64="$cosign_key_base64" envsubst <"$offline_base_config" >"$offline_new_config"
-    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" pod_config="\$pod_config" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
+    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" pod_config="\$pod_config" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
 
     echo "$new_config"
 }
