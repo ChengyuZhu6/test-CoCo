@@ -10,6 +10,6 @@
 	kubernetes_create_cc_pod_tests $pod_config
 	kubectl get pods
 	pod_id=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
-	kubernetes_delete_cc_pod_if_exists $pod_id || true
+	kubernetes_delete_cc_pod_if_exists $pod_id 
 	rm $pod_config
 }

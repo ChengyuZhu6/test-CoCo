@@ -6,6 +6,6 @@
 		pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in "confidential-containers-auth" "$RUNTIMECLASSNAME" "quay.io/kata-containers/confidential-containers-auth:test" )"
 		kubernetes_create_cc_pod_tests $pod_config
 		pod_name=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
-		kubernetes_delete_cc_pod_if_exists "$pod_name"| true
+		kubernetes_delete_cc_pod_if_exists "$pod_name"
 		rm $pod_config
 }
