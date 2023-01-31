@@ -115,38 +115,38 @@ Test_trust_storage() {
 	rm -r $GOPATH/open-local
 }
 Test_signed_image() {
-	for IMAGE in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		skopeo --insecure-policy copy --sign-passphrase-file $TEST_COCO_PATH/../signed/passwd.txt --sign-by $GPG_EMAIL docker://$REGISTRY_NAME/$IMAGE:latest docker://$REGISTRY_NAME/$IMAGE:signed
-		# tar -cf ${TEST_COCO_PATH}/../signed/signatures.tar.gz /var/lib/containers/sigstore/$IMAGE*
-		setup_skopeo_signature_files_in_guest $IMAGE
-		pod_config="$(new_pod_config $TEST_COCO_PATH/../fixtures/pod-config.yaml.in "$IMAGE" "$RUNTIMECLASS" "$REGISTRY_NAME/$IMAGE:signed")"
-		create_test_pod $pod_config
-		kubectl get pods
-		pod_id=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
-		kubernetes_delete_cc_pod_if_exists $pod_id || true
-		rm $pod_config
-	done
+	local IMAGE="ubuntu"
+	local RUNTIMECLASS="kata-qemu"
+	switch_measured_rootfs_verity_scheme none
+
+	# for IMAGE in ${EXAMPLE_IMAGE_LISTS[@]}; do
+	skopeo --insecure-policy copy --sign-passphrase-file $TEST_COCO_PATH/../signed/passwd.txt --sign-by $GPG_EMAIL docker://$REGISTRY_NAME/ci-$IMAGE:latest docker://$REGISTRY_NAME/ci-$IMAGE:signed
+	# tar -cf ${TEST_COCO_PATH}/../signed/signatures.tar.gz /var/lib/containers/sigstore/$IMAGE*
+	setup_skopeo_signature_files_in_guest ci-$IMAGE
+	pod_config="$(new_pod_config $TEST_COCO_PATH/../fixtures/signed_image-config.yaml.in "ci-$IMAGE" "$RUNTIMECLASS" "$REGISTRY_NAME/ci-$IMAGE:signed")"
+	echo $pod_config
+	kubernetes_create_cc_pod_tests $pod_config
+	kubectl get pods
+	pod_id=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
+	kubernetes_delete_cc_pod_if_exists $pod_id || true
+	rm $pod_config
+	# done
 }
 Test_encrypted_image() {
 
-	generate_encrypted_image
-	exit 0
-	# VERDICTDID=$(ps ux | grep "verdictd" | grep -v "grep" | awk '{print $2}')
-	# if [ "$VERDICTDID" == "" ]; then
-	# 	verdictd --listen 0.0.0.0:50000 --mutual >/dev/null 2>&1 &
-	# fi
-	# sleep 1
-	setup_eaa_decryption_files_in_guest
-	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
-	for IMAGE in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		pod_config="$(new_pod_config $TEST_COCO_PATH/../fixtures/k8s-cc-ssh.yaml.in "$IMAGE" "$RUNTIMECLASS" "$REGISTRY_NAME/$IMAGE:$VERSION")"
+	set_runtimeclass_config kata-qemu
+	#clear_kernel_params
+	switch_image_service_offload on
+	$TEST_COCO_PATH/../run/losetup-crt.sh /opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image c
+	switch_measured_rootfs_verity_scheme none
+	#remove_kernel_param "agent.enable_signature_verification"
+	generate_encrypted_image ci-ubuntu
 
-		pull_encrypted_image_inside_guest_with_decryption_key $pod_config
-		rm $pod_config
-	done
-	VERDICTDID=$(ps ux | grep "verdictd " | grep -v "grep" | awk '{print $2}')
-	echo $VERDICTDID
-	kill -9 $VERDICTDID
+	setup_eaa_decryption_files_in_guest
+	pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/encrypted_image-config.yaml.in "ci-ubuntu" "kata-qemu" "$REGISTRY_NAME/ci-ubuntu:encrypted")"
+	pull_encrypted_image_inside_guest_with_decryption_key $pod_config
+	# assert_pod_fail "$pod_config"
+	rm $pod_config
 }
 
 Test_uninstall_operator() {
@@ -200,9 +200,9 @@ Test_auth_image() {
 	switch_image_service_offload on
 	add_kernel_params "agent.https_proxy=http://child-prc.intel.com:913"
 	add_kernel_params "agent.no_proxy=*.sh.intel.com,10.*"
-	echo "$RUNTIMECLASSNAME"
-	setup_credentials_files "quay.io/kata-containers/confidential-containers-auth:test"
-	pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in "auth" "kata-qemu-tdx" "docker.io/zcy1234/busybox:latest")"
+	add_kernel_params "agent.aa_kbc_params=eaa_kbc::$(hostname -I | awk '{print $1}'):50000"
+	# setup_credentials_files "quay.io/kata-containers/confidential-containers-auth:test"
+	pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in "auth" "kata-qemu-tdx" "quay.io/kata-containers/confidential-containers-auth:test")"
 	# pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in "auth" "kata" "quay.io/prometheus/busybox:latest")"
 
 	kubernetes_create_cc_pod_tests $pod_config
@@ -243,7 +243,9 @@ main() {
 	# Test_unencrypted_unsigned_image
 	# run_registry
 	# Test_install_operator
-	Test_auth_image
+	# Test_auth_image
+	Test_signed_image
+	# Test_encrypted_image
 	# Test_install_operator
 	# Test_measured_boot_image
 	# reset_runtime
@@ -262,8 +264,8 @@ main() {
 	# $TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
 	# pull_image
 	# Test_encrypted_image_offline
-	Test_uninstall_operator
-	cleanup_network_interface
+	# Test_uninstall_operator
+	# cleanup_network_interface
 	# teardown
 }
 main "$@"

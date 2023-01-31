@@ -75,7 +75,7 @@ parse_args() {
 		i) ;;
 		o)
 			run_operator_install
-			# run_operator_uninstall
+			run_operator_uninstall
 			;;
 		d) ;;
 		p) ;;
@@ -94,12 +94,13 @@ parse_args() {
 			run_operator_install_measured_boot
 			run_measured_boot_image_config
 			move_certs_to_rootfs
+			run_auth_registry_image_config
 			run_multiple_pod_spec_and_images_config
 			run_encrypted_image_config
 			run_offline_encrypted_image_config
 			run_signed_image_config
 			run_cosigned_image_config
-			run_trust_storage_config			
+			run_trust_storage_config
 			run_operator_uninstall
 			;;
 		h) usage 0 ;;
@@ -111,15 +112,22 @@ parse_args() {
 	done
 	return 0
 }
-move_certs_to_rootfs(){
+move_certs_to_rootfs() {
+	if [ -z "$TDX_STATUS" ]; then
+		export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
+	else
+		export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image"
+
+	fi
+	echo $ROOTFS_IMAGE_PATH
 	get_certs_from_remote
 	$TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
 }
 generate_tests() {
 	local base_config="$TEST_COCO_PATH/../templates/multiple_pod_spec.template"
 	local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
-	IMAGE="example" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$(echo $1| tr A-Z a-z):$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
-
+	# IMAGE="example" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$(echo $1 | tr A-Z a-z):$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
+	IMAGE="$1" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$1:$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
 	echo "$new_config"
 }
 run_operator_install() {
@@ -146,13 +154,13 @@ run_multiple_pod_spec_and_images_config() {
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
-	local new_pod_configs="$TEST_COCO_PATH/../tests/multiple_pod_spec_and_images.bats"
+	local new_pod_configs="$TEST_COCO_PATH/../tests/multiple_pod_spec.bats"
 	local str="Test_multiple_pod_spec_and_images"
 	echo -e "load ../run/lib.sh " | tee -a $new_pod_configs >/dev/null
-	for image in ${IMAGE_LISTS[@]}; do
+	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		# docker pull $image
 		# echo $image
-		image_size=$(docker image ls | grep $(echo ci-$image| tr A-Z a-z) | head -1 | awk '{print $7}')
+		image_size=$(docker image ls | grep $(echo ci-$image | tr A-Z a-z) | head -1 | awk '{print $7}')
 		for runtimeclass in ${RUNTIMECLASS[@]}; do
 			for cpunums in ${CPUCONFIG[@]}; do
 				for memsize in ${MEMCONFIG[@]}; do
@@ -165,7 +173,7 @@ run_multiple_pod_spec_and_images_config() {
 		done
 	done
 	echo "$(bats -f "$tests_passing" \
-		"$TEST_COCO_PATH/../tests/multiple_pod_spec_and_images.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+		"$TEST_COCO_PATH/../tests/multiple_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tests/*
 	rm -rf $TEST_COCO_PATH/../fixtures/multiple_pod_spec_and_images-config.yaml.in.*
@@ -260,7 +268,7 @@ run_encrypted_image_config() {
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
-		for runtimeclass in ${EAATDXRUNTIMECLASS[@]}; do
+		for runtimeclass in ${RUNTIMECLASS[@]}; do
 			echo "runtimeclass = $runtimeclass"
 			cat "$(generate_tests_encrypted_image "$TEST_COCO_PATH/../templates/encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
@@ -313,12 +321,12 @@ run_measured_boot_image_config() {
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	docker pull busybox
 	image_size=$(docker image ls | grep "busybox" | head -1 | awk '{print $7}')
-	# for runtimeclass in ${RUNTIMECLASS[@]}; do
-	runtimeclass="kata-qemu"
+	for runtimeclass in ${RUNTIMECLASS[@]}; do
+		# runtimeclass="kata-qemu"
 		cat "$(generate_tests_measured_boot_image "$TEST_COCO_PATH/../templates/measured_boot.template" busybox $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 		tests_passing+="|${str} busybox $image_size $runtimeclass"
 		tests_passing+="|${str}_failed busybox $image_size $runtimeclass"
-	# done
+	done
 	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/measured_boot.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
@@ -338,6 +346,9 @@ run_auth_registry_image_config() {
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		for runtimeclass in ${RUNTIMECLASS[@]}; do
+			if [ "runtimeclass" == "kata-clh-tdx" ]; then
+				continue
+			fi
 			cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/auth_registry.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		done

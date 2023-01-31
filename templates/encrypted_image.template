@@ -2,6 +2,7 @@
 	#skip  
 	set_runtimeclass_config $RUNTIMECLASSNAME
 	#clear_kernel_params
+	remove_kernel_param "agent.aa_kbc_params"
 	switch_image_service_offload on
 	$TEST_COCO_PATH/../run/losetup-crt.sh /opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image c
 	switch_measured_rootfs_verity_scheme none

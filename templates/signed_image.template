@@ -1,15 +1,15 @@
 @test "Test_simple_signed_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
 	set_runtimeclass_config $RUNTIMECLASSNAME
-	#switch_measured_rootfs_verity_scheme none
+	switch_measured_rootfs_verity_scheme none
 	#remove_kernel_param "agent.enable_signature_verification"
 	skopeo --insecure-policy copy --sign-passphrase-file ${test_coco_path}/../signed/passwd.txt --sign-by $GPG_EMAIL docker://$REGISTRTYIMAGE:latest  docker://$REGISTRTYIMAGE:signed
 	#tar -cf ${test_coco_path}/../signed/signatures.tar.gz /var/lib/containers/sigstore/$IMAGE*
 	setup_skopeo_signature_files_in_guest $IMAGE
 	pod_config="$(new_pod_config_normal ${test_coco_path}/../fixtures/signed_image-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE:signed")"
-	create_test_pod $pod_config
+
+	kubernetes_create_cc_pod_tests $pod_config
 	kubectl get pods
 	pod_id=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
 	kubernetes_delete_cc_pod_if_exists $pod_id || true
 	rm $pod_config
 }
-skopeo --insecure-policy copy --sign-passphrase-file passwd-test.txt --sign-by 57B1D98278A1C9F66A758B8E521B3840F6D118CC docker://ngcn-registry.sh.intel.com/ci-ubuntu:latest  docker://ngcn-registry.sh.intel.com/ci-ubuntu:signed-test

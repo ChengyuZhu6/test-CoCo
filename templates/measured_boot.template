@@ -6,7 +6,7 @@
 		add_kernel_params "agent.https_proxy=$HTTPS_PROXY"
 		add_kernel_params "agent.no_proxy=$NO_PROXY"
 		pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/measured-boot-config.yaml.in "busybox" "$RUNTIMECLASSNAME" "quay.io/prometheus/busybox:latest" )"
-		pull_encrypted_image_inside_guest_with_decryption_key $pod_config
+		kubernetes_create_cc_pod_tests $pod_config
 		rm $pod_config
 		switch_measured_rootfs_verity_scheme none
 }

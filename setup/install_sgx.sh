@@ -17,7 +17,7 @@ chmod +x ./linux/installer/bin/sgx_linux_x64_sdk_2.18.101.1.bin
 source /opt/intel/sgxsdk/environment
 
 # make psw
-cp /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.71.0 /usr/lib/libboost_thread.so
+cp /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.74.0 /usr/lib/libboost_thread.so
 make deb_psw_pkg
 
 apt-get install -y dpkg-dev
@@ -34,10 +34,10 @@ cd /var/www/html/repo
 apt-ftparchive packages . > Packages
 apt-ftparchive release . > Release
 gpg --gen-key #gpg --list-keys查看
-gpg -a --export 1D9E98F19F6C4753B1A3C1C588FC0869AE0784C8 | apt-key add -  #apt客户端导入公钥
+gpg -a --export E692CD8D7D71D16E72491C0BC6EC4D93629B42F6 | apt-key add -  #apt客户端导入公钥
 gpg -a --export intel > username.pub  #导出公钥
 apt-key add username.pub #导入公钥
-gpg -a --export 1D9E98F19F6C4753B1A3C1C588FC0869AE0784C8 | apt-key add -     #其中pub key可用gpg --list-keys查到
+gpg -a --export E692CD8D7D71D16E72491C0BC6EC4D93629B42F6 | apt-key add -     #其中pub key可用gpg --list-keys查到
 gpg --clearsign -o InRelease Release #gpg生成一个明文签名
 gpg -abs -o Release.gpg Release #gpg生成一个分离签名
 

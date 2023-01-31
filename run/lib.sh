@@ -147,7 +147,7 @@ clear_kernel_params() {
 #
 kubernetes_wait_cc_pod_be_ready() {
     local pod_name="$1"
-    local wait_time="${2:-120}"
+    local wait_time="${2:-30}"
 
     kubectl wait --timeout=${wait_time}s --for=condition=ready pods/$pod_name
 }
@@ -210,11 +210,11 @@ kubernetes_create_cc_pod_tests() {
         return 1
     fi
 
-    if ! kubernetes_wait_cc_pod_be_ready "$pod_name"; then
+    if ! kubernetes_wait_cc_pod_be_running "$pod_name"; then
         # TODO: run this command for debugging. Maybe it should be
         #       guarded by DEBUG=true?
         kubectl get pods "$pod_name"
-        kubernetes_delete_cc_pod_if_exists  "$pod_name"
+        kubernetes_delete_cc_pod_if_exists "$pod_name"
         return 1
     fi
 }
@@ -477,9 +477,9 @@ EOF
 
     # generate encrypted image
 
-    VERDICTDID=$(ps ux | grep "verdictd --client-api" | grep -v "grep" | awk '{print $2}')
-    echo $VERDICTDID
-    sudo kill -9 $VERDICTDID
+    # VERDICTDID=$(ps ux | grep "verdictd --client-api" | grep -v "grep" | awk '{print $2}')
+    # echo $VERDICTDID
+    # sudo kill -9 $VERDICTDID
 }
 generate_offline_encrypted_image() {
     local img="$1"
@@ -544,7 +544,7 @@ EOF
     # setup_eaa_kbc_agent_config_in_guest "eaa_kbc::10.112.240.208:50000"
 }
 setup_credentials_files() {
-	add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
+    add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
     # setup_eaa_kbc_agent_config_in_guest "offline_fs_kbc::null"
     # REGISTRY_CREDENTIAL_ENCODED="a2F0YS1jb250YWluZXJzK2NjX2F1dGg6VjFBRkU5UkM0TVQyQTZNR0pCVTIxUFJON1VETkFHMVNMTDJNOVNMUVlLOEE5VExLR09WN04wUlNYNUw0RTgxVA=="
     local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources_test.json.in"
@@ -612,7 +612,7 @@ setup_skopeo_signature_files_in_guest() {
 setup_common_signature_files_in_guest() {
     rootfs_sig_directory="var/lib/containers/sigstore/"
     target_image_dir=$(ls /var/lib/containers/sigstore/ | grep "$1@sha256=*")
-    cp_to_guest_img "${rootfs_sig_directory}" "$target_image_dir"
+    cp_to_guest_img "${rootfs_sig_directory}" "/$rootfs_sig_directory/$target_image_dir"
 
 }
 generate_tests_trust_storage() {
@@ -786,7 +786,7 @@ get_certs_from_remote() {
         update-ca-trust
     fi
     set_docker_certs
-    # pull_image
+    pull_image
     # create_image_size
 }
 run_registry() {
@@ -810,7 +810,7 @@ run_registry() {
         -e REGISTRY_HTTP_ADDR=0.0.0.0:$PORT -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt \
         -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key -e REGISTRY_BASIC_AUTH="emN5MTIzNDp6Y3lzdXJwYXNzMjAyMAo=" -p $PORT:$PORT registry:2
     systemctl restart docker
-    # docker tag 
+    # docker tag
     # pull_image
     # create_image_size
 }
@@ -874,12 +874,12 @@ set_runtimeclass_config() {
         ;;
     "kata-qemu-tdx")
         export CURRENT_CONFIG_FILE="configuration-qemu-tdx.toml"
-        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
+        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image"
 
         ;;
     "kata-clh-tdx")
         export CURRENT_CONFIG_FILE="configuration-clh-tdx.toml"
-        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
+        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image"
 
         ;;
     "kata-clh-tdx-eaa-kbc")
@@ -907,18 +907,21 @@ read_config() {
     # export CONFIG_FILES=($(ls -l ${RUNTIME_CONFIG_PATH} | awk '{print $9}'))
     export CURRENT_CONFIG_FILE="configuration-qemu.toml"
     # TDX_STATUS=$(grep -o tdx /proc/cpuinfo)
-    if [ -z "$TDX_STATUS" ]; then
-        export RUNTIMECLASS=$(jq -r '.config.runtimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
-    else
+    # if [ -z "$TDX_STATUS" ]; then
+    #     export RUNTIMECLASS=$(jq -r '.config.runtimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
+    #     set_runtimeclass_config kata-qemu
+    # else
         export RUNTIMECLASS=$(jq -r '.config.TDXRuntimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
-    fi
+        set_runtimeclass_config kata-qemu-tdx
+    # fi
+    echo "$RUNTIMECLASS"
     export EAATDXRUNTIMECLASS=$(jq -r '.config.eaaTDXRuntimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
     export CPUCONFIG=$(jq -r '.config.cpuNum[]' $TEST_COCO_PATH/../config/test_config.json)
     export MEMCONFIG=$(jq -r '.config.memSize[]' $TEST_COCO_PATH/../config/test_config.json)
     export PODNUMCONFIG=$(jq -r '.config.podNum[]' $TEST_COCO_PATH/../config/test_config.json)
     export katacontainers_repo_dir=$GOPATH/src/github.com/kata-containers/kata-containers
     export kata_test_repo_dir=$GOPATH/src/github.com/kata-containers/tests
-    export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
+    # export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
     export CONTAINERD_CONF_FILE="/etc/containerd/config.toml"
     export OPERATOR_VERSION=$(jq -r '.file.operatorVersion' $TEST_COCO_PATH/../config/test_config.json)
 
@@ -1240,7 +1243,7 @@ reset_runtime() {
 
     # kubectl delete -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/deploy/deploy.yaml
     kubectl delete -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
-    # kubectl delete -k github.com/confidential-containers/operator/config/default 
+    # kubectl delete -k github.com/confidential-containers/operator/config/default
     kubectl delete -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
     kubeadm reset -f
     # if [ -f /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf ]; then
@@ -1272,7 +1275,7 @@ install_cc() {
     # sed -i 's/latest/v0.1.0/g' $GOPATH/src/github.com/operator-0.1.0/deploy/deploy.yaml
     # kubectl apply -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/deploy/deploy.yaml
     kubectl apply -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
-    # kubectl apply -k github.com/confidential-containers/operator/config/default 
+    # kubectl apply -k github.com/confidential-containers/operator/config/default
     # kubectl taint nodes --all node-role.kubernetes.io/control-plane-
     test_pod_for_deploy
     if [ $? -eq 1 ]; then

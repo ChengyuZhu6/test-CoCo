@@ -30,6 +30,7 @@ if [ $FLAG == "c" ]; then
     cat $TEST_COCO_PATH/../certs/domain.crt >>/mnt/$MNT_DIR/etc/ssl/certs/ca-certificates.crt
 
     # cp /usr/local/bin/attestation-agent /mnt/$MNT_DIR/usr/local/bin/attestation-agent
+    # cp $GOPATH/src/github.com/attestation-agent/app/target/x86_64-unknown-linux-gnu/release/attestation-agent /mnt/$MNT_DIR/usr/local/bin/attestation-agent
 elif [ $FLAG == "r" ]; then
     cp ./mnt/ca-certificates.crt /mnt/$MNT_DIR/etc/ssl/certs/ca-certificates.crt
     # cp ./mnt/attestation-agent /mnt/$MNT_DIR/usr/local/bin/attestation-agent

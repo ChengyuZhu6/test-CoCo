@@ -54,17 +54,18 @@ remove_flannel() {
 	ip link del "$dev" || true
 }
 reset_runtime() {
-    OPERATOR_VERSION=$(jq -r .file.operatorVersion $TEST_COCO_PATH/../config/test_config.json)
+     OPERATOR_VERSION=$(jq -r .file.operatorVersion $TEST_COCO_PATH/../config/test_config.json)
     export KUBECONFIG=/etc/kubernetes/admin.conf
-    kubectl delete -f https://raw.githubusercontent.com/confidential-containers/operator/main/config/samples/ccruntime.yaml
+    # kubectl delete -f $TEST_COCO_PATH/../ccruntime.yaml
+    kubectl delete -k github.com/confidential-containers/operator/config/samples/ccruntime/default?ref=v${OPERATOR_VERSION}
+    # kubectl delete -f https://raw.githubusercontent.com/confidential-containers/operator/main/config/samples/ccruntime.yaml
     # kubectl delete -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/config/samples/ccruntime.yaml
     # kubectl apply -f https://raw.githubusercontent.com/confidential-containers/operator/main/deploy/deploy.yaml
 
     # kubectl delete -f $GOPATH/src/github.com/operator-${OPERATOR_VERSION}/deploy/deploy.yaml
     kubectl delete -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
-
+    # kubectl delete -k github.com/confidential-containers/operator/config/default 
     kubectl delete -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-    echo "delete k8s"
     kubeadm reset -f
     # if [ -f /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf ]; then
     #     rm /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf
@@ -158,7 +159,7 @@ init_kubeadm() {
         return 1
     fi
 }
-init_kubeadm
+reset_runtime
 # main "$@"
 # reset_runtime
 # install_runtime
