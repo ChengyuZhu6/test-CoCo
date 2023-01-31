@@ -429,7 +429,7 @@ main() {
 	echo -e "Common Cloud Native projects: TODO"
 	echo -e "\n"
 	echo -e "-------Install Depedencies:-------\n"
-	# setup_env
+	setup_env
 	echo "--------Operator Version--------"
 	OPERATOR_VERSION=$(jq -r .file.operatorVersion $SCRIPT_PATH/config/test_config.json)
 	echo "Operator Version: $OPERATOR_VERSION"
@@ -451,7 +451,7 @@ main() {
 		mkdir -p $SCRIPT_PATH/report/view
 	fi
 	parse_args $@
-	# cleanup_network_interface
+	cleanup_network_interface
 	echo "tests are finished"
 	return 0
 }
