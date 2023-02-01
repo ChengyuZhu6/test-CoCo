@@ -6,10 +6,16 @@
 	pod_config="$(new_pod_config_normal ${test_coco_path}/../fixtures/cosign-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/cosigned/$IMAGE:cosigned")"
 	remove_kernel_param "agent.enable_signature_verification"
 	remove_kernel_param "agent.aa_kbc_params"
-	add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
-	add_kernel_params "agent.config_file=/etc/offline-agent-config.toml"
-	cp_to_guest_img "etc" "${test_coco_path}/../config/offline-agent-config.toml"
-	cp_to_guest_img "etc" "${test_coco_path}/../tests/aa-offline_fs_kbc-resources.json"
+	rtcs=$RUNTIMECLASSNAME
+	if [ "${rtcs##*-}" == "tdx" ]; then 
+		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$(hostname -I | awk '{print $1}'):50000"
+	else
+		add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
+		#add_kernel_params "agent.config_file=/etc/offline-agent-config.toml"
+		#cp_to_guest_img "etc" "${test_coco_path}/../config/offline-agent-config.toml"
+		cp_to_guest_img "etc" "${test_coco_path}/../tests/aa-offline_fs_kbc-resources.json"
+	fi
+
 	kubernetes_create_cc_pod_tests $pod_config
 	pod_name=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
 	kubernetes_delete_cc_pod "$pod_name"

@@ -1,11 +1,18 @@
 @test "Test_simple_signed_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
 	set_runtimeclass_config $RUNTIMECLASSNAME
 	switch_measured_rootfs_verity_scheme none
-	#remove_kernel_param "agent.enable_signature_verification"
-	skopeo --insecure-policy copy --sign-passphrase-file ${test_coco_path}/../signed/passwd.txt --sign-by $GPG_EMAIL docker://$REGISTRTYIMAGE:latest  docker://$REGISTRTYIMAGE:signed
-	#tar -cf ${test_coco_path}/../signed/signatures.tar.gz /var/lib/containers/sigstore/$IMAGE*
+	remove_kernel_param "agent.enable_signature_verification"
+	remove_kernel_param "agent.aa_kbc_params"
+	gpg --import ${test_coco_path}/../signed/pubkey.gpg
+	skopeo --insecure-policy copy --sign-passphrase-file ${test_coco_path}/../signed/passwd.txt --sign-by $GPG_EMAIL docker://$REGISTRTYIMAGE:latest  docker://$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed
 	setup_skopeo_signature_files_in_guest $IMAGE
-	pod_config="$(new_pod_config_normal ${test_coco_path}/../fixtures/signed_image-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE:signed")"
+	rtcs=$RUNTIMECLASSNAME
+	if [ "${rtcs##*-}" == "tdx" ]; then 
+		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$(hostname -I | awk '{print $1}'):50000"
+	else
+		setup_offline_signed_files_in_guest
+	fi
+	pod_config="$(new_pod_config_normal ${test_coco_path}/../fixtures/signed_image-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed")"
 
 	kubernetes_create_cc_pod_tests $pod_config
 	kubectl get pods

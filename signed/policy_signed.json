@@ -6,11 +6,11 @@
     ],
     "transports": {
         "docker": {
-            "quay.io/kata-containers/confidential-containers": [
+            "${REGISTRY_NAME}/signed": [
                 {
                     "type": "signedBy",
                     "keyType": "GPGKeys",
-                    "keyPath": "/etc/containers/quay_verification/public.gpg"
+                    "keyPath": "/run/image-security/simple_signing/pubkey.gpg"
                 }
             ]
         }

@@ -559,7 +559,7 @@ setup_credentials_files() {
 setup_offline_decryption_files_in_guest() {
     add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
     # add_kernel_params "agent.config_file=/etc/offline-agent-config.toml"
-    cp_to_guest_img "etc" "$TEST_COCO_PATH/../config/offline-agent-config.toml"
+    #cp_to_guest_img "etc" "$TEST_COCO_PATH/../config/offline-agent-config.toml"
     cp_to_guest_img "etc" "$TEST_COCO_PATH/../config/aa-offline_fs_kbc-keys.json"
     local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
     local offline_new_config="$TEST_COCO_PATH/../tests/aa-offline_fs_kbc-resources.json"
@@ -568,6 +568,26 @@ setup_offline_decryption_files_in_guest() {
     local c_k_b="$(cat $TEST_COCO_PATH/../certs/cosign.pub | base64)"
     local cosign_key_base64=$(echo $c_k_b | tr -d '\n' | tr -d ' ')
     POLICY_BASE64="$policy_base64" COSIGN_KEY_BASE64="$cosign_key_base64" envsubst <"$offline_base_config" >"$offline_new_config"
+    cp_to_guest_img "etc" "$offline_new_config"
+}
+setup_offline_signed_files_in_guest() {
+    add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
+
+    local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
+    local offline_new_config="$TEST_COCO_PATH/../tests/aa-offline_fs_kbc-resources.json"
+    local policy_old="$TEST_COCO_PATH/../signed/policy_signed.json"
+    local policy_new="$TEST_COCO_PATH/../tests/policy_signed.json"
+    REGISTRY_NAME="$REGISTRY_NAME" envsubst <"$policy_old" >"$policy_new"
+    local policy_base64="$(cat "$policy_new" | base64 -w 0)"
+
+    local sigstore_old="$TEST_COCO_PATH/../signed/sigstore.yaml"
+    local sigstore_new="$TEST_COCO_PATH/../tests/sigstore.yaml"
+    REGISTRY_NAME="$REGISTRY_NAME" envsubst <"$sigstore_old" >"$sigstore_new"
+    local sigstore_base64="$(cat "$sigstore_new" | base64 -w 0 )"
+
+    local gpgkey_base64="$(cat $TEST_COCO_PATH/../signed/pubkey.gpg | base64 -w 0 )"
+
+    POLICY_BASE64="$policy_base64" SIGSTORE="$sigstore_base64" GPGKEY="$gpgkey_base64" envsubst <"$offline_base_config" >"$offline_new_config"
     cp_to_guest_img "etc" "$offline_new_config"
 }
 kubernetes_create_ssh_demo_pod() {
@@ -607,13 +627,13 @@ setup_skopeo_signature_files_in_guest() {
     rootfs_directory="etc/containers/"
     target_image="$1"
     setup_common_signature_files_in_guest $target_image
-    cp_to_guest_img "${rootfs_directory}" "/etc/containers/registries.d"
+    # cp_to_guest_img "${rootfs_directory}" "/etc/containers/registries.d"
 }
 
 setup_common_signature_files_in_guest() {
-    rootfs_sig_directory="var/lib/containers/sigstore/"
-    target_image_dir=$(ls /var/lib/containers/sigstore/ | grep "$1@sha256=*")
-    cp_to_guest_img "${rootfs_sig_directory}" "/$rootfs_sig_directory/$target_image_dir"
+    rootfs_sig_directory="etc/containers/quay_verification/signatures"
+    target_image_dir=$(ls /var/lib/containers/sigstore/signed/ | grep "$1@sha256=*")
+    cp_to_guest_img "${rootfs_sig_directory}" "/var/lib/containers/sigstore/signed/$target_image_dir"
 
 }
 generate_tests_trust_storage() {
@@ -628,7 +648,7 @@ generate_tests_signed_image() {
     local base_config=$1
     local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
 
-    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" pod_config="\$pod_config" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
+    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" rtcs="\$rtcs" pod_config="\$pod_config" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
 
     echo "$new_config"
 }
@@ -683,7 +703,7 @@ generate_tests_cosign_image() {
     local c_k_b="$(cat $TEST_COCO_PATH/../certs/cosign.pub | base64)"
     local cosign_key_base64=$(echo $c_k_b | tr -d '\n' | tr -d ' ')
     POLICY_BASE64="$policy_base64" COSIGN_KEY_BASE64="$cosign_key_base64" envsubst <"$offline_base_config" >"$offline_new_config"
-    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" pod_config="\$pod_config" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
+    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" rtcs="\$rtcs" pod_config="\$pod_config" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
 
     echo "$new_config"
 }
