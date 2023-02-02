@@ -253,7 +253,7 @@ main() {
 	set_runtimeclass_config kata-qemu
 	$TEST_COCO_PATH/../run/losetup-crt.sh "/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image" c
 	$TEST_COCO_PATH/../run/losetup-crt.sh "/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image" c
-	Test_signed_image
+	# Test_signed_image
 	# Test_install_operator
 	# get_certs_from_remote
 	# set_runtimeclass_config kata-qemu

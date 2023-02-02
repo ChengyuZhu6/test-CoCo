@@ -627,11 +627,11 @@ setup_skopeo_signature_files_in_guest() {
     rootfs_directory="etc/containers/"
     target_image="$1"
     setup_common_signature_files_in_guest $target_image
-    # cp_to_guest_img "${rootfs_directory}" "/etc/containers/registries.d"
+    cp_to_guest_img "${rootfs_directory}" "$TEST_COCO_PATH/../signed/pubkey.gpg"
 }
 
 setup_common_signature_files_in_guest() {
-    rootfs_sig_directory="etc/containers/quay_verification/signatures"
+    rootfs_sig_directory="etc/containers/quay_verification/signatures/signed/"
     target_image_dir=$(ls /var/lib/containers/sigstore/signed/ | grep "$1@sha256=*")
     cp_to_guest_img "${rootfs_sig_directory}" "/var/lib/containers/sigstore/signed/$target_image_dir"
 

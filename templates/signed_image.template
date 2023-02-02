@@ -3,7 +3,8 @@
 	switch_measured_rootfs_verity_scheme none
 	remove_kernel_param "agent.enable_signature_verification"
 	remove_kernel_param "agent.aa_kbc_params"
-	gpg --import ${test_coco_path}/../signed/pubkey.gpg
+	#gpg --import ${test_coco_path}/../signed/pubkey.gpg
+	gpg -a -o ${test_coco_path}/../signed/pubkey.gpg --export $GPG_EMAIL
 	skopeo --insecure-policy copy --sign-passphrase-file ${test_coco_path}/../signed/passwd.txt --sign-by $GPG_EMAIL docker://$REGISTRTYIMAGE:latest  docker://$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed
 	setup_skopeo_signature_files_in_guest $IMAGE
 	rtcs=$RUNTIMECLASSNAME
@@ -19,4 +20,5 @@
 	pod_id=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
 	kubernetes_delete_cc_pod $pod_id 
 	rm $pod_config
+	rm ${test_coco_path}/../signed/pubkey.gpg
 }

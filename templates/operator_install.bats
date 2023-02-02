@@ -11,9 +11,6 @@ setup() {
 
 
 @test "Test install operator" {
-	#install_runtime
-	#export PATH=$PATH:/usr/local/bin:/usr/local/sbin
-	#echo "PATH=$PATH" >&3
 	init_kubeadm
 	echo "Prepare containerd for Confidential Container"
 
@@ -25,9 +22,9 @@ setup() {
 	add_kernel_params "debug_console_enabled=true"
 	#run_registry
 	get_certs_from_remote
-	#$TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
-	$TEST_COCO_PATH/../run/losetup-crt.sh "/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image" c
-	$TEST_COCO_PATH/../run/losetup-crt.sh "/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image" c
+	$TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
+	#$TEST_COCO_PATH/../run/losetup-crt.sh "/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image" c
+	#$TEST_COCO_PATH/../run/losetup-crt.sh "/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image" c
 }
 
 
