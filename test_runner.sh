@@ -37,61 +37,81 @@ EOF
 parse_args() {
 	read_config
 
-	while getopts "uestabmiopfchd :" opt; do
+	while getopts "u:e:s:t:a:b:m:i:o:p:f:c:h:d: " opt; do
 		case $opt in
 		u)
+			echo "-u runtime: $OPTARG "
+			
 			run_operator_install
+			set_runtimeclass_config $OPTARG
 			run_multiple_pod_spec_and_images_config
 			run_operator_uninstall
 			;;
 		e)
+			echo "-e runtime: $OPTARG "
 			run_operator_install
+			set_runtimeclass_config $OPTARG
 			run_encrypted_image_config
 			run_operator_uninstall
 			;;
 		s)
+			echo "-s runtime: $OPTARG "
 			run_operator_install
+			set_runtimeclass_config $OPTARG
 			run_signed_image_config
 			run_operator_uninstall
 			;;
 		t)
+			echo "-t runtime: $OPTARG "
 			run_operator_install
+			set_runtimeclass_config $OPTARG
 			run_trust_storage_config
 			run_operator_uninstall
 			;;
 		n) ;;
 
 		b)
+			echo "-b runtime: $OPTARG "
 			run_operator_install_measured_boot
+			set_runtimeclass_config $OPTARG
 			run_measured_boot_image_config
 			run_operator_uninstall
 			;;
 		m)
+			echo "-m runtime: $OPTARG "
 			run_operator_install
+			set_runtimeclass_config $OPTARG
 			run_auth_registry_image_config
 			run_operator_uninstall
 			;;
 
 		i) ;;
 		o)
+			echo "-o runtime: $OPTARG "
 			run_operator_install
 			run_operator_uninstall
 			;;
 		d) ;;
 		p) ;;
 		f)
+			echo "-f runtime: $OPTARG "
 			run_operator_install
+			set_runtimeclass_config $OPTARG
 			run_offline_encrypted_image_config
 			run_operator_uninstall
 			;;
 		c)
+			echo "-c runtime: $OPTARG "
 			run_operator_install
 			run_cosigned_image_config
 			run_operator_uninstall
 			;;
 		d) ;;
 		a)
+			echo "-a runtime: $OPTARG "
+			
 			run_operator_install_measured_boot
+			set_runtimeclass_config $OPTARG
 			run_measured_boot_image_config
 			move_certs_to_rootfs
 			run_auth_registry_image_config
@@ -113,11 +133,11 @@ parse_args() {
 	return 0
 }
 move_certs_to_rootfs() {
-	 if [ $TDX_STATUS -ge 1 ]; then
-        set_runtimeclass_config kata-qemu-tdx
-    else
-        set_runtimeclass_config kata-qemu
-    fi
+	if [ $TDX_STATUS -ge 1 ]; then
+		set_runtimeclass_config kata-qemu-tdx
+	else
+		set_runtimeclass_config kata-qemu
+	fi
 	echo $ROOTFS_IMAGE_PATH
 	get_certs_from_remote
 	$TEST_COCO_PATH/../run/losetup-crt.sh "/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image" c
@@ -161,16 +181,17 @@ run_multiple_pod_spec_and_images_config() {
 		# docker pull $image
 		# echo $image
 		image_size=$(docker image ls | grep $(echo ci-$image | tr A-Z a-z) | head -1 | awk '{print $7}')
-		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			for cpunums in ${CPUCONFIG[@]}; do
-				for memsize in ${MEMCONFIG[@]}; do
-					for podnum in ${PODNUMCONFIG[@]}; do
-						cat "$(generate_tests ci-$image $image_size $runtimeclass $podnum $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
-						tests_passing+="|${str} ci-$image $image_size $runtimeclass ${podnum}PODs ${cpunums}CPUs ${memsize}GB"
-					done
+		runtimeclass=$Current_RuntimeClass
+		# for runtimeclass in ${RUNTIMECLASS[@]}; do
+		for cpunums in ${CPUCONFIG[@]}; do
+			for memsize in ${MEMCONFIG[@]}; do
+				for podnum in ${PODNUMCONFIG[@]}; do
+					cat "$(generate_tests ci-$image $image_size $runtimeclass $podnum $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
+					tests_passing+="|${str} ci-$image $image_size $runtimeclass ${podnum}PODs ${cpunums}CPUs ${memsize}GB"
 				done
 			done
 		done
+		# done
 	done
 	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/multiple_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
@@ -192,11 +213,12 @@ run_trust_storage_config() {
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
-		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			cat "$(generate_tests_trust_storage "$TEST_COCO_PATH/../templates/trust_storage.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} ci-$image $image_size $runtimeclass "
+		runtimeclass=$Current_RuntimeClass
+		# for runtimeclass in ${RUNTIMECLASS[@]}; do
+		cat "$(generate_tests_trust_storage "$TEST_COCO_PATH/../templates/trust_storage.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+		tests_passing+="|${str} ci-$image $image_size $runtimeclass "
 
-		done
+		# done
 	done
 	cat "$TEST_COCO_PATH/../templates/operator_trust_storage.bats" | tee -a $new_pod_configs >/dev/null
 	tests_passing+="|Test uninstall open-local"
@@ -216,10 +238,11 @@ run_signed_image_config() {
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
-		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			cat "$(generate_tests_signed_image "$TEST_COCO_PATH/../templates/signed_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
-		done
+		runtimeclass=$Current_RuntimeClass
+		# for runtimeclass in ${RUNTIMECLASS[@]}; do
+		cat "$(generate_tests_signed_image "$TEST_COCO_PATH/../templates/signed_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+		tests_passing+="|${str} ci-$image $image_size $runtimeclass"
+		# done
 	done
 	echo -e "load ../run/lib.sh \n  \n read_config" | tee -a $new_pod_configs >/dev/null
 	echo "$(bats -f "$tests_passing" \
@@ -240,11 +263,11 @@ run_cosigned_image_config() {
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
-
-		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			cat "$(generate_tests_cosign_image "$TEST_COCO_PATH/../templates/cosigned_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
-		done
+		runtimeclass=$Current_RuntimeClass
+		# for runtimeclass in ${RUNTIMECLASS[@]}; do
+		cat "$(generate_tests_cosign_image "$TEST_COCO_PATH/../templates/cosigned_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+		tests_passing+="|${str} ci-$image $image_size $runtimeclass"
+		# done
 	done
 
 	echo "$(bats -f "$tests_passing" \
@@ -268,11 +291,12 @@ run_encrypted_image_config() {
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
-		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			echo "runtimeclass = $runtimeclass"
-			cat "$(generate_tests_encrypted_image "$TEST_COCO_PATH/../templates/encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
-		done
+		runtimeclass=$Current_RuntimeClass
+		# for runtimeclass in ${RUNTIMECLASS[@]}; do
+		echo "runtimeclass = $runtimeclass"
+		cat "$(generate_tests_encrypted_image "$TEST_COCO_PATH/../templates/encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+		tests_passing+="|${str} ci-$image $image_size $runtimeclass"
+		# done
 	done
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 
@@ -297,11 +321,12 @@ run_offline_encrypted_image_config() {
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
-		for runtimeclass in ${RUNTIMECLASS[@]}; do
-			echo "runtimeclass = $runtimeclass"
-			cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/offline_encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
-		done
+		runtimeclass=$Current_RuntimeClass
+		# for runtimeclass in ${RUNTIMECLASS[@]}; do
+		echo "runtimeclass = $runtimeclass"
+		cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/offline_encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+		tests_passing+="|${str} ci-$image $image_size $runtimeclass"
+		# done
 	done
 
 	echo "$(bats -f "$tests_passing" \
@@ -321,12 +346,12 @@ run_measured_boot_image_config() {
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	docker pull busybox
 	image_size=$(docker image ls | grep "busybox" | head -1 | awk '{print $7}')
-	for runtimeclass in ${RUNTIMECLASS[@]}; do
-		# runtimeclass="kata-qemu"
-		cat "$(generate_tests_measured_boot_image "$TEST_COCO_PATH/../templates/measured_boot.template" busybox $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-		tests_passing+="|${str} busybox $image_size $runtimeclass"
-		tests_passing+="|${str}_failed busybox $image_size $runtimeclass"
-	done
+	# for runtimeclass in ${RUNTIMECLASS[@]}; do
+	runtimeclass=$Current_RuntimeClass
+	cat "$(generate_tests_measured_boot_image "$TEST_COCO_PATH/../templates/measured_boot.template" busybox $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+	tests_passing+="|${str} busybox $image_size $runtimeclass"
+	tests_passing+="|${str}_failed busybox $image_size $runtimeclass"
+	# done
 	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/measured_boot.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
@@ -345,13 +370,14 @@ run_auth_registry_image_config() {
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
-		for runtimeclass in ${RUNTIMECLASS[@]}; do
+		runtimeclass=$Current_RuntimeClass
+		# for runtimeclass in ${RUNTIMECLASS[@]}; do
 			if [ "runtimeclass" == "kata-clh-tdx" ]; then
 				continue
 			fi
 			cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/auth_registry.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
-		done
+		# done
 	done
 	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../tests/auth_registry.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
@@ -452,7 +478,7 @@ main() {
 		mkdir -p $SCRIPT_PATH/report/view
 	fi
 	parse_args $@
-	cleanup_network_interface
+	# cleanup_network_interface
 	echo "tests are finished"
 	return 0
 }
