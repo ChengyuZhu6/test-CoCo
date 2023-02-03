@@ -16,7 +16,7 @@ load ../run/lib.sh
 
 @test "Test_auth_registry $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
     set_runtimeclass_config $RUNTIMECLASSNAME
-    if [ "${RUNTIMECLASSNAME##*-}" != "tdx" ]; then
+    if [ $(echo ${RUNTIMECLASSNAME} | grep tdx | wc -l) -le 0 ]; then
         skip
     fi
     get_certs_from_remote
@@ -46,7 +46,7 @@ load ../run/lib.sh
 }
 @test "Test_eaa_kbc_encrypted_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
     set_runtimeclass_config $RUNTIMECLASSNAME
-    if [ "${RUNTIMECLASSNAME##*-}" != "tdx" ]; then
+    if [ $(echo ${RUNTIMECLASSNAME} | grep tdx | wc -l) -le 0 ]; then
         skip
     fi
     remove_kernel_param "agent.aa_kbc_params"
@@ -62,7 +62,7 @@ load ../run/lib.sh
 @test "Test_offline_encrypted_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
     set_runtimeclass_config $RUNTIMECLASSNAME
     remove_kernel_param "agent.aa_kbc_params"
-    if [ "${RUNTIMECLASSNAME##*-}" == "tdx" ]; then
+    if [ $(echo ${RUNTIMECLASSNAME} | grep tdx | wc -l) -gt 0 ]; then
         skip
     fi
     switch_image_service_offload on
