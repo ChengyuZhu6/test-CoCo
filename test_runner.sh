@@ -98,11 +98,11 @@ parse_args() {
 			run_operator_uninstall
 			;;
 		d)
-			echo "-i runtime: $OPTARG "
+			echo "-d runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
 			run_operator_install
 			run_pod_spec_tests_config
-			run_operator_uninstallz
+			run_operator_uninstall
 			;;
 		p) ;;
 		f)

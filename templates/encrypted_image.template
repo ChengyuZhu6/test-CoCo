@@ -1,6 +1,9 @@
 @test "Test_eaa_kbc_encrypted_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
 	#skip  
 	set_runtimeclass_config $RUNTIMECLASSNAME
+	if [ $(echo ${RUNTIMECLASSNAME} | grep tdx | wc -l) -le 0 ]; then
+        skip
+    fi
 	#clear_kernel_params
 	remove_kernel_param "agent.aa_kbc_params"
 	switch_image_service_offload on
