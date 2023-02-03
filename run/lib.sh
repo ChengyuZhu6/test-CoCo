@@ -902,19 +902,6 @@ set_runtimeclass_config() {
         export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image"
 
         ;;
-    "kata-clh-tdx-eaa-kbc")
-        export CURRENT_CONFIG_FILE="configuration-clh-tdx-eaa-kbc.toml"
-        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image"
-
-        ;;
-    "kata-qemu-tdx-eaa-kbc")
-        export CURRENT_CONFIG_FILE="configuration-qemu-tdx-eaa-kbc.toml"
-        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image"
-        ;;
-    "kata")
-        export CURRENT_CONFIG_FILE="configuration.toml"
-        export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
-        ;;
     esac
 
 }
