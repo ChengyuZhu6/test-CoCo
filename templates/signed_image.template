@@ -4,7 +4,7 @@
 	remove_kernel_param "agent.enable_signature_verification"
 	remove_kernel_param "agent.aa_kbc_params"
 	#gpg --import ${test_coco_path}/../signed/pubkey.gpg
-	gpg --no-tty -a -o ${test_coco_path}/../signed/pubkey.gpg --export $GPG_EMAIL
+	gpg --no-tty --batch -a -o ${test_coco_path}/../signed/pubkey.gpg --export $GPG_EMAIL
 	skopeo --insecure-policy copy --sign-passphrase-file ${test_coco_path}/../signed/passwd.txt --sign-by $GPG_EMAIL docker://$REGISTRTYIMAGE:latest  docker://$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed
 	setup_skopeo_signature_files_in_guest $IMAGE
 	rtcs=$RUNTIMECLASSNAME
