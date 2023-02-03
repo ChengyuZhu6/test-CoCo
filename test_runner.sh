@@ -475,10 +475,10 @@ main() {
 	fi
 
 	if [ ! -d $SCRIPT_PATH/report/view ]; then
-		mkdir -p $SCRIPT_PATH/report/view
+		sudo mkdir -p $SCRIPT_PATH/report/view
 	fi
 	if [ ! -d $SCRIPT_PATH/tmp ]; then
-		mkdir -p $SCRIPT_PATH/tmp
+		sudo mkdir -p $SCRIPT_PATH/tmp
 	fi
 	parse_args $@
 	# cleanup_network_interface
