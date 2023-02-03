@@ -145,7 +145,7 @@ move_certs_to_rootfs() {
 }
 generate_tests() {
 	local base_config="$TEST_COCO_PATH/../templates/multiple_pod_spec.template"
-	local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
+	local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
 	# IMAGE="example" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$(echo $1 | tr A-Z a-z):$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
 	IMAGE="$1" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$1:$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
 	echo "$new_config"
@@ -174,7 +174,7 @@ run_multiple_pod_spec_and_images_config() {
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
-	local new_pod_configs="$TEST_COCO_PATH/../tests/multiple_pod_spec.bats"
+	local new_pod_configs="$TEST_COCO_PATH/../tmp/multiple_pod_spec.bats"
 	local str="Test_multiple_pod_spec_and_images"
 	echo -e "load ../run/lib.sh " | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
@@ -194,9 +194,9 @@ run_multiple_pod_spec_and_images_config() {
 		# done
 	done
 	echo "$(bats -f "$tests_passing" \
-		"$TEST_COCO_PATH/../tests/multiple_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+		"$TEST_COCO_PATH/../tmp/multiple_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
-	rm -rf $TEST_COCO_PATH/../tests/*
+	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/multiple_pod_spec_and_images-config.yaml.in.*
 }
 run_trust_storage_config() {
@@ -206,7 +206,7 @@ run_trust_storage_config() {
 		return 1
 	fi
 	local pod_configs="$TEST_COCO_PATH/../templates/trust_storage.bats"
-	local new_pod_configs="$TEST_COCO_PATH/../tests/$(basename ${pod_configs})"
+	local new_pod_configs="$TEST_COCO_PATH/../tmp/$(basename ${pod_configs})"
 	local str="Test_trust_storage"
 	tests_passing="Test install open-local"
 	cp $pod_configs $new_pod_configs
@@ -223,9 +223,9 @@ run_trust_storage_config() {
 	cat "$TEST_COCO_PATH/../templates/operator_trust_storage.bats" | tee -a $new_pod_configs >/dev/null
 	tests_passing+="|Test uninstall open-local"
 	echo "$(bats -f "$tests_passing" \
-		"$TEST_COCO_PATH/../tests/trust_storage.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+		"$TEST_COCO_PATH/../tmp/trust_storage.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
-	rm -rf $TEST_COCO_PATH/../tests/*
+	rm -rf $TEST_COCO_PATH/../tmp/*
 }
 run_signed_image_config() {
 	test_pod_for_ccruntime
@@ -233,7 +233,7 @@ run_signed_image_config() {
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
-	local new_pod_configs="$TEST_COCO_PATH/../tests/signed_image.bats"
+	local new_pod_configs="$TEST_COCO_PATH/../tmp/signed_image.bats"
 	local str="Test_simple_signed_image"
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
 		docker pull $image
@@ -246,9 +246,9 @@ run_signed_image_config() {
 	done
 	echo -e "load ../run/lib.sh \n  \n read_config" | tee -a $new_pod_configs >/dev/null
 	echo "$(bats -f "$tests_passing" \
-		"$TEST_COCO_PATH/../tests/signed_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+		"$TEST_COCO_PATH/../tmp/signed_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
-	rm -rf $TEST_COCO_PATH/../tests/*
+	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/signed_image-config.yaml.in.*
 }
 run_cosigned_image_config() {
@@ -257,7 +257,7 @@ run_cosigned_image_config() {
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
-	local new_pod_configs="$TEST_COCO_PATH/../tests/cosigned_image.bats"
+	local new_pod_configs="$TEST_COCO_PATH/../tmp/cosigned_image.bats"
 	local str="Test_cosigned_image"
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
@@ -271,9 +271,9 @@ run_cosigned_image_config() {
 	done
 
 	echo "$(bats -f "$tests_passing" \
-		"$TEST_COCO_PATH/../tests/cosigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+		"$TEST_COCO_PATH/../tmp/cosigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
-	rm -rf $TEST_COCO_PATH/../tests/*
+	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/cosign-config.yaml.in.*
 }
 run_encrypted_image_config() {
@@ -282,7 +282,7 @@ run_encrypted_image_config() {
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
-	local new_pod_configs="$TEST_COCO_PATH/../tests/encrypted_image.bats"
+	local new_pod_configs="$TEST_COCO_PATH/../tmp/encrypted_image.bats"
 	local str="Test_eaa_kbc_encrypted_image"
 	# VERDICTDID=$(ps ux | grep "verdictd" | grep -v "grep" | awk '{print $2}')
 	# if [ "$VERDICTDID" == "" ]; then
@@ -301,12 +301,12 @@ run_encrypted_image_config() {
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 
 	echo "$(bats -f "$tests_passing" \
-		"$TEST_COCO_PATH/../tests/encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+		"$TEST_COCO_PATH/../tmp/encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	# VERDICTDID=$(ps ux | grep "verdictd " | grep -v "grep" | awk '{print $2}')
 	# echo $VERDICTDID
 	# kill -9 $VERDICTDID
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
-	rm -rf $TEST_COCO_PATH/../tests/*
+	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/encrypted_image-config.yaml.in.*
 }
 run_offline_encrypted_image_config() {
@@ -315,7 +315,7 @@ run_offline_encrypted_image_config() {
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
-	local new_pod_configs="$TEST_COCO_PATH/../tests/offline_encrypted_image.bats"
+	local new_pod_configs="$TEST_COCO_PATH/../tmp/offline_encrypted_image.bats"
 	local str="Test_offline_encrypted_image"
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
@@ -330,9 +330,9 @@ run_offline_encrypted_image_config() {
 	done
 
 	echo "$(bats -f "$tests_passing" \
-		"$TEST_COCO_PATH/../tests/offline_encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+		"$TEST_COCO_PATH/../tmp/offline_encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
-	rm -rf $TEST_COCO_PATH/../tests/*
+	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/offline-encrypted-config.yaml.in.*
 }
 run_measured_boot_image_config() {
@@ -341,7 +341,7 @@ run_measured_boot_image_config() {
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
-	local new_pod_configs="$TEST_COCO_PATH/../tests/measured_boot.bats"
+	local new_pod_configs="$TEST_COCO_PATH/../tmp/measured_boot.bats"
 	local str="Test_measured_boot"
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	docker pull busybox
@@ -353,9 +353,9 @@ run_measured_boot_image_config() {
 	tests_passing+="|${str}_failed busybox $image_size $runtimeclass"
 	# done
 	echo "$(bats -f "$tests_passing" \
-		"$TEST_COCO_PATH/../tests/measured_boot.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+		"$TEST_COCO_PATH/../tmp/measured_boot.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
-	rm -rf $TEST_COCO_PATH/../tests/*
+	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/measured-boot-config.yaml.in.*
 }
 run_auth_registry_image_config() {
@@ -364,7 +364,7 @@ run_auth_registry_image_config() {
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
-	local new_pod_configs="$TEST_COCO_PATH/../tests/auth_registry.bats"
+	local new_pod_configs="$TEST_COCO_PATH/../tmp/auth_registry.bats"
 	local str="Test_auth_registry"
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
@@ -380,9 +380,9 @@ run_auth_registry_image_config() {
 		# done
 	done
 	echo "$(bats -f "$tests_passing" \
-		"$TEST_COCO_PATH/../tests/auth_registry.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+		"$TEST_COCO_PATH/../tmp/auth_registry.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
-	rm -rf $TEST_COCO_PATH/../tests/*
+	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in.*
 }
 print_image() {
@@ -476,6 +476,9 @@ main() {
 
 	if [ ! -d $SCRIPT_PATH/report/view ]; then
 		mkdir -p $SCRIPT_PATH/report/view
+	fi
+	if [ ! -d $SCRIPT_PATH/tmp ]; then
+		mkdir -p $SCRIPT_PATH/tmp
 	fi
 	parse_args $@
 	# cleanup_network_interface

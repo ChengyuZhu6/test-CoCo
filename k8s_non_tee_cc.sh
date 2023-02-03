@@ -162,7 +162,7 @@ Test_cosign_image() {
 	local REGISTRTYIMAGE="zcy-Z390-AORUS-MASTER.sh.intel.com/nginx:latest"
 	generate_cosign_image $(echo $REGISTRTYIMAGE | cut -d ":" -f1)
 	local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
-	local offline_new_config="$TEST_COCO_PATH/../tests/aa-offline_fs_kbc-resources.json"
+	local offline_new_config="$TEST_COCO_PATH/../tmp/aa-offline_fs_kbc-resources.json"
 	local p_b="$(cat $TEST_COCO_PATH/../config/policy.json | base64)"
 	local policy_base64=$(echo $p_b | tr -d '\n' | tr -d ' ')
 	local c_k_b="$(cat $TEST_COCO_PATH/../certs/cosign.pub | base64)"
@@ -174,7 +174,7 @@ Test_cosign_image() {
 	add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
 	add_kernel_params "agent.config_file=/etc/offline-agent-config.toml"
 	cp_to_guest_img "etc" "$TEST_COCO_PATH/../config/offline-agent-config.toml"
-	cp_to_guest_img "etc" "$TEST_COCO_PATH/../tests/aa-offline_fs_kbc-resources.json"
+	cp_to_guest_img "etc" "$TEST_COCO_PATH/../tmp/aa-offline_fs_kbc-resources.json"
 	create_test_pod $pod_config
 	kubectl get pods
 	pod_id=$(kubectl get pods -o jsonpath='{.items..metadata.name}')

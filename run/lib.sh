@@ -549,7 +549,7 @@ setup_credentials_files() {
     # setup_eaa_kbc_agent_config_in_guest "offline_fs_kbc::null"
     # REGISTRY_CREDENTIAL_ENCODED="a2F0YS1jb250YWluZXJzK2NjX2F1dGg6VjFBRkU5UkM0TVQyQTZNR0pCVTIxUFJON1VETkFHMVNMTDJNOVNMUVlLOEE5VExLR09WN04wUlNYNUw0RTgxVA=="
     local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources_test.json.in"
-    local offline_new_config="$TEST_COCO_PATH/../tests/aa-offline_fs_kbc-resources.json"
+    local offline_new_config="$TEST_COCO_PATH/../tmp/aa-offline_fs_kbc-resources.json"
     # auth_json=$(REGISTRY=$1 CREDENTIALS="${REGISTRY_CREDENTIAL_ENCODED}" envsubst <"$TEST_COCO_PATH/../config/auth.json.in" | base64 -w 0)
     auth_json=$(base64 -w 0 $TEST_COCO_PATH/../config/auth.json)
     echo "$auth_json"
@@ -562,7 +562,7 @@ setup_offline_decryption_files_in_guest() {
     #cp_to_guest_img "etc" "$TEST_COCO_PATH/../config/offline-agent-config.toml"
     cp_to_guest_img "etc" "$TEST_COCO_PATH/../config/aa-offline_fs_kbc-keys.json"
     local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
-    local offline_new_config="$TEST_COCO_PATH/../tests/aa-offline_fs_kbc-resources.json"
+    local offline_new_config="$TEST_COCO_PATH/../tmp/aa-offline_fs_kbc-resources.json"
     local p_b="$(cat $TEST_COCO_PATH/../config/policy.json | base64)"
     local policy_base64=$(echo $p_b | tr -d '\n' | tr -d ' ')
     local c_k_b="$(cat $TEST_COCO_PATH/../certs/cosign.pub | base64)"
@@ -574,14 +574,14 @@ setup_offline_signed_files_in_guest() {
     add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
 
     local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
-    local offline_new_config="$TEST_COCO_PATH/../tests/aa-offline_fs_kbc-resources.json"
+    local offline_new_config="$TEST_COCO_PATH/../tmp/aa-offline_fs_kbc-resources.json"
     local policy_old="$TEST_COCO_PATH/../signed/policy_signed.json"
-    local policy_new="$TEST_COCO_PATH/../tests/policy_signed.json"
+    local policy_new="$TEST_COCO_PATH/../tmp/policy_signed.json"
     REGISTRY_NAME="$REGISTRY_NAME" envsubst <"$policy_old" >"$policy_new"
     local policy_base64="$(cat "$policy_new" | base64 -w 0)"
 
     local sigstore_old="$TEST_COCO_PATH/../signed/sigstore.yaml"
-    local sigstore_new="$TEST_COCO_PATH/../tests/sigstore.yaml"
+    local sigstore_new="$TEST_COCO_PATH/../tmp/sigstore.yaml"
     REGISTRY_NAME="$REGISTRY_NAME" envsubst <"$sigstore_old" >"$sigstore_new"
     local sigstore_base64="$(cat "$sigstore_new" | base64 -w 0 )"
 
@@ -638,7 +638,7 @@ setup_common_signature_files_in_guest() {
 }
 generate_tests_trust_storage() {
     local base_config=$1
-    local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
+    local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
 
     IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2:$VERSION" pod_config="\$pod_config" go_path="\$GOPATH" test_coco_path="\$TEST_COCO_PATH" POD_NAME="\${POD_NAME}" pod_config_snap="\$pod_config_snap" snap_metadata_name="\$snap_metadata_name" SNAP_POD_NAME="\${SNAP_POD_NAME}" envsubst <"$base_config" >"$new_config"
 
@@ -646,7 +646,7 @@ generate_tests_trust_storage() {
 }
 generate_tests_signed_image() {
     local base_config=$1
-    local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
+    local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
 
     IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" rtcs="\$rtcs" pod_config="\$pod_config" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
 
@@ -654,7 +654,7 @@ generate_tests_signed_image() {
 }
 generate_tests_encrypted_image() {
     local base_config=$1
-    local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
+    local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
 
     IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" pod_config="\$pod_config" test_coco_path="\${TEST_COCO_PATH}" VERDICTDID="\$VERDICTDID" envsubst <"$base_config" >"$new_config"
 
@@ -662,7 +662,7 @@ generate_tests_encrypted_image() {
 }
 generate_tests_measured_boot_image() {
     local base_config=$1
-    local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
+    local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
 
     IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" HTTPS_PROXY="$https_proxy" NO_PROXY="$no_proxy" pod_config="\$pod_config" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" envsubst <"$base_config" >"$new_config"
 
@@ -670,7 +670,7 @@ generate_tests_measured_boot_image() {
 }
 generate_tests_offline_encrypted_image() {
     local base_config=$1
-    local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
+    local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
 
     IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" pod_config="\$pod_config" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" envsubst <"$base_config" >"$new_config"
 
@@ -695,9 +695,9 @@ EOF
 }
 generate_tests_cosign_image() {
     local base_config=$1
-    local new_config=$(mktemp "$TEST_COCO_PATH/../tests/$(basename ${base_config}).XXX")
+    local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
     local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
-    local offline_new_config="$TEST_COCO_PATH/../tests/aa-offline_fs_kbc-resources.json"
+    local offline_new_config="$TEST_COCO_PATH/../tmp/aa-offline_fs_kbc-resources.json"
     local p_b="$(cat $TEST_COCO_PATH/../config/policy.json | base64)"
     local policy_base64=$(echo $p_b | tr -d '\n' | tr -d ' ')
     local c_k_b="$(cat $TEST_COCO_PATH/../certs/cosign.pub | base64)"
@@ -914,15 +914,15 @@ read_config() {
     # export CONFIG_FILES=($(ls -l ${RUNTIME_CONFIG_PATH} | awk '{print $9}'))
     export CURRENT_CONFIG_FILE="configuration-qemu.toml"
     # TDX_STATUS=$(grep -o tdx /proc/cpuinfo)
-    if [ $TDX_STATUS -ge 1 ]; then
-        export RUNTIMECLASS=$(jq -r '.config.TDXRuntimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
-        set_runtimeclass_config kata-qemu-tdx
-    else
-        export RUNTIMECLASS=$(jq -r '.config.runtimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
-        set_runtimeclass_config kata-qemu
-    fi
-    echo "$RUNTIMECLASS"
-    export EAATDXRUNTIMECLASS=$(jq -r '.config.eaaTDXRuntimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
+    # if [ $TDX_STATUS -ge 1 ]; then
+    #     export RUNTIMECLASS=$(jq -r '.config.TDXRuntimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
+    #     set_runtimeclass_config kata-qemu-tdx
+    # else
+    #     export RUNTIMECLASS=$(jq -r '.config.runtimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
+    #     set_runtimeclass_config kata-qemu
+    # fi
+    # echo "$RUNTIMECLASS"
+    # export EAATDXRUNTIMECLASS=$(jq -r '.config.eaaTDXRuntimeClass[]' $TEST_COCO_PATH/../config/test_config.json)
     export CPUCONFIG=$(jq -r '.config.cpuNum[]' $TEST_COCO_PATH/../config/test_config.json)
     export MEMCONFIG=$(jq -r '.config.memSize[]' $TEST_COCO_PATH/../config/test_config.json)
     export PODNUMCONFIG=$(jq -r '.config.podNum[]' $TEST_COCO_PATH/../config/test_config.json)

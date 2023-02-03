@@ -13,7 +13,7 @@
 		add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
 		#add_kernel_params "agent.config_file=/etc/offline-agent-config.toml"
 		#cp_to_guest_img "etc" "${test_coco_path}/../config/offline-agent-config.toml"
-		cp_to_guest_img "etc" "${test_coco_path}/../tests/aa-offline_fs_kbc-resources.json"
+		cp_to_guest_img "etc" "${test_coco_path}/../tmp/aa-offline_fs_kbc-resources.json"
 	fi
 
 	kubernetes_create_cc_pod_tests $pod_config
