@@ -84,7 +84,13 @@ parse_args() {
 			run_operator_uninstall
 			;;
 
-		i) ;;
+		i)
+			echo "-i runtime: $OPTARG "
+			set_runtimeclass_config $OPTARG
+			run_operator_install_measured_boot
+			run_function_tests_config
+			run_operator_uninstall
+			;;
 		o)
 			echo "-o runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
@@ -107,7 +113,6 @@ parse_args() {
 			run_cosigned_image_config
 			run_operator_uninstall
 			;;
-		d) ;;
 		a)
 			echo "-a runtime: $OPTARG "
 			run_operator_install_measured_boot
@@ -146,7 +151,6 @@ move_certs_to_rootfs() {
 generate_tests() {
 	local base_config="$TEST_COCO_PATH/../templates/multiple_pod_spec.template"
 	local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
-	# IMAGE="example" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$(echo $1 | tr A-Z a-z):$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
 	IMAGE="$1" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$1:$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
 	echo "$new_config"
 }
@@ -167,6 +171,45 @@ run_operator_uninstall() {
 	echo "$(bats -f "$tests_passing" \
 		"$TEST_COCO_PATH/../templates/operator_uninstall.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/operator_uninstall.xml
+}
+run_pod_spec_tests_config() {
+	test_pod_for_ccruntime
+	if [ $? -eq 1 ]; then
+		echo "ERROR: cc runtimes are not deployed"
+		return 1
+	fi
+	local new_pod_configs="$TEST_COCO_PATH/../tmp/pod_spec.bats"
+	local str="Test_pod_spec_for_unencrypted_unsigned_image"
+	echo -e "load ../run/lib.sh " | tee -a $new_pod_configs >/dev/null
+
+	local image="nginx"
+	image_size=$(docker image ls | grep $(echo ci-$image | tr A-Z a-z) | head -1 | awk '{print $7}')
+	runtimeclass=$Current_RuntimeClass
+	for cpunums in ${CPUCONFIG[@]}; do
+		for memsize in ${MEMCONFIG[@]}; do
+			cat "$(generate_tests ci-$image $image_size $runtimeclass 1 $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
+		done
+	done
+	echo "$(bats "$TEST_COCO_PATH/../tmp/pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	rm -rf $TEST_COCO_PATH/../tmp/*
+}
+run_function_tests_config() {
+	test_pod_for_ccruntime
+	if [ $? -eq 1 ]; then
+		echo "ERROR: cc runtimes are not deployed"
+		return 1
+	fi
+	local pod_configs="$TEST_COCO_PATH/../tests/function_test/function_test.bats"
+	local new_pod_configs="$TEST_COCO_PATH/../tmp/function_test.bats"
+	local image="nginx"
+	image_size=$(docker image ls | grep $(echo ci-$image | tr A-Z a-z) | head -1 | awk '{print $7}')
+	runtimeclass=$Current_RuntimeClass
+	cat "$(insert_params_into_function_tests "$pod_configs" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+	echo "$(bats "$new_pod_configs" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	rm -f $TEST_COCO_PATH/../tmp/*
+	rm -f $TEST_COCO_PATH/../fixtures/*.in.*
 }
 run_multiple_pod_spec_and_images_config() {
 	test_pod_for_ccruntime
@@ -197,7 +240,6 @@ run_multiple_pod_spec_and_images_config() {
 		"$TEST_COCO_PATH/../tmp/multiple_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
-	rm -rf $TEST_COCO_PATH/../fixtures/multiple_pod_spec_and_images-config.yaml.in.*
 }
 run_trust_storage_config() {
 	test_pod_for_ccruntime

@@ -217,7 +217,7 @@ kubernetes_create_cc_pod_tests() {
         kubernetes_delete_cc_pod_if_exists "$pod_name"
         return 1
     fi
-    
+
 }
 enable_agent_console() {
 
@@ -583,9 +583,9 @@ setup_offline_signed_files_in_guest() {
     local sigstore_old="$TEST_COCO_PATH/../signed/sigstore.yaml"
     local sigstore_new="$TEST_COCO_PATH/../tmp/sigstore.yaml"
     REGISTRY_NAME="$REGISTRY_NAME" envsubst <"$sigstore_old" >"$sigstore_new"
-    local sigstore_base64="$(cat "$sigstore_new" | base64 -w 0 )"
+    local sigstore_base64="$(cat "$sigstore_new" | base64 -w 0)"
 
-    local gpgkey_base64="$(cat $TEST_COCO_PATH/../signed/pubkey.gpg | base64 -w 0 )"
+    local gpgkey_base64="$(cat $TEST_COCO_PATH/../signed/pubkey.gpg | base64 -w 0)"
 
     POLICY_BASE64="$policy_base64" SIGSTORE="$sigstore_base64" GPGKEY="$gpgkey_base64" envsubst <"$offline_base_config" >"$offline_new_config"
     cp_to_guest_img "etc" "$offline_new_config"
@@ -635,6 +635,12 @@ setup_common_signature_files_in_guest() {
     target_image_dir=$(ls /var/lib/containers/sigstore/signed/ | grep "$1@sha256=*")
     cp_to_guest_img "${rootfs_sig_directory}" "/var/lib/containers/sigstore/signed/$target_image_dir"
 
+}
+insert_params_into_function_tests() {
+    local base_config=$1
+    local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
+    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" rtcs="\$rtcs" pod_config="\$pod_config" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" HTTPS_PROXY="$https_proxy" NO_PROXY="$no_proxy" envsubst <"$base_config" >"$new_config"
+    echo "$new_config"
 }
 generate_tests_trust_storage() {
     local base_config=$1
