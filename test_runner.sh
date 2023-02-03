@@ -41,30 +41,29 @@ parse_args() {
 		case $opt in
 		u)
 			echo "-u runtime: $OPTARG "
-			
-			run_operator_install
 			set_runtimeclass_config $OPTARG
+			run_operator_install
 			run_multiple_pod_spec_and_images_config
 			run_operator_uninstall
 			;;
 		e)
 			echo "-e runtime: $OPTARG "
-			run_operator_install
 			set_runtimeclass_config $OPTARG
+			run_operator_install
 			run_encrypted_image_config
 			run_operator_uninstall
 			;;
 		s)
 			echo "-s runtime: $OPTARG "
-			run_operator_install
 			set_runtimeclass_config $OPTARG
+			run_operator_install
 			run_signed_image_config
 			run_operator_uninstall
 			;;
 		t)
 			echo "-t runtime: $OPTARG "
-			run_operator_install
 			set_runtimeclass_config $OPTARG
+			run_operator_install
 			run_trust_storage_config
 			run_operator_uninstall
 			;;
@@ -72,15 +71,15 @@ parse_args() {
 
 		b)
 			echo "-b runtime: $OPTARG "
-			run_operator_install_measured_boot
 			set_runtimeclass_config $OPTARG
+			run_operator_install_measured_boot
 			run_measured_boot_image_config
 			run_operator_uninstall
 			;;
 		m)
 			echo "-m runtime: $OPTARG "
-			run_operator_install
 			set_runtimeclass_config $OPTARG
+			run_operator_install
 			run_auth_registry_image_config
 			run_operator_uninstall
 			;;
@@ -88,6 +87,7 @@ parse_args() {
 		i) ;;
 		o)
 			echo "-o runtime: $OPTARG "
+			set_runtimeclass_config $OPTARG
 			run_operator_install
 			run_operator_uninstall
 			;;
@@ -95,13 +95,14 @@ parse_args() {
 		p) ;;
 		f)
 			echo "-f runtime: $OPTARG "
-			run_operator_install
 			set_runtimeclass_config $OPTARG
+			run_operator_install
 			run_offline_encrypted_image_config
 			run_operator_uninstall
 			;;
 		c)
 			echo "-c runtime: $OPTARG "
+			set_runtimeclass_config $OPTARG
 			run_operator_install
 			run_cosigned_image_config
 			run_operator_uninstall
@@ -109,7 +110,6 @@ parse_args() {
 		d) ;;
 		a)
 			echo "-a runtime: $OPTARG "
-			
 			run_operator_install_measured_boot
 			set_runtimeclass_config $OPTARG
 			run_measured_boot_image_config
@@ -239,6 +239,8 @@ run_signed_image_config() {
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
+		echo $Current_RuntimeClass
+		echo $runtimeclass
 		# for runtimeclass in ${RUNTIMECLASS[@]}; do
 		cat "$(generate_tests_signed_image "$TEST_COCO_PATH/../templates/signed_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 		tests_passing+="|${str} ci-$image $image_size $runtimeclass"
@@ -293,7 +295,7 @@ run_encrypted_image_config() {
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		# for runtimeclass in ${RUNTIMECLASS[@]}; do
-		echo "runtimeclass = $runtimeclass"
+		echo "!!!runtimeclass = $runtimeclass"
 		cat "$(generate_tests_encrypted_image "$TEST_COCO_PATH/../templates/encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 		tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		# done
@@ -372,11 +374,11 @@ run_auth_registry_image_config() {
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		# for runtimeclass in ${RUNTIMECLASS[@]}; do
-			if [ "runtimeclass" == "kata-clh-tdx" ]; then
-				continue
-			fi
-			cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/auth_registry.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
+		if [ "runtimeclass" == "kata-clh-tdx" ]; then
+			continue
+		fi
+		cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/auth_registry.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+		tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		# done
 	done
 	echo "$(bats -f "$tests_passing" \
@@ -408,8 +410,6 @@ setup_env() {
 	git clone https://github.com/ChengyuZhu6/operator.git $operator_repo
 	export KUBECONFIG=/etc/kubernetes/admin.conf
 	bash $operator_repo/tests/e2e/run-local.sh -r kata-qemu
-	# git clone -b 2022-12-24 https://github.com/ChengyuZhu6/tests.git $GOPATH/src/github.com/kata-containers/tests
-	# bash $GOPATH/src/github.com/kata-containers/tests/.ci/setup.sh
 
 	echo "install bats"
 	# $SCRIPT_PATH/setup/install_bats.sh
@@ -456,7 +456,7 @@ main() {
 	echo -e "Common Cloud Native projects: TODO"
 	echo -e "\n"
 	echo -e "-------Install Depedencies:-------\n"
-	setup_env
+	# setup_env
 	echo "--------Operator Version--------"
 	OPERATOR_VERSION=$(jq -r .file.operatorVersion $SCRIPT_PATH/config/test_config.json)
 	echo "Operator Version: $OPERATOR_VERSION"

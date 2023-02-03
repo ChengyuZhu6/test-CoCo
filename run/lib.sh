@@ -886,21 +886,22 @@ set_runtimeclass_config() {
     "kata-qemu")
         export CURRENT_CONFIG_FILE="configuration-qemu.toml"
         export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
+        export Current_RuntimeClass="kata-qemu"
         ;;
     "kata-clh")
         export CURRENT_CONFIG_FILE="configuration-clh.toml"
         export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image"
-
+        export Current_RuntimeClass="kata-clh"
         ;;
     "kata-qemu-tdx")
         export CURRENT_CONFIG_FILE="configuration-qemu-tdx.toml"
         export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image"
-
+        export Current_RuntimeClass="kata-qemu-tdx"
         ;;
     "kata-clh-tdx")
         export CURRENT_CONFIG_FILE="configuration-clh-tdx.toml"
         export ROOTFS_IMAGE_PATH="/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image"
-
+        export Current_RuntimeClass="kata-clh-tdx"
         ;;
     esac
 
