@@ -1,9 +1,9 @@
-@test "Test_cosigned_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
+@test "Test_pod_spec_for_cosigned_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_CPU_NUM}CPUs ${POD_MEM_SIZE}GB" {
 	set_runtimeclass_config $RUNTIMECLASSNAME
 	switch_measured_rootfs_verity_scheme none
 	#generate_cosign_image $(echo $REGISTRTYIMAGE | cut -d ":" -f1)
 	
-	pod_config="$(new_pod_config_normal ${test_coco_path}/../fixtures/cosign-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/cosigned/$IMAGE:cosigned")"
+	pod_config="$(new_pod_config ${test_coco_path}/../tests/pod_spec/fixtures/pod_spec.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/cosigned/$IMAGE:cosigned" "1" "$POD_CPU_NUM" "$POD_MEM_SIZE")"
 	remove_kernel_param "agent.enable_signature_verification"
 	remove_kernel_param "agent.aa_kbc_params"
 	rtcs=$RUNTIMECLASSNAME
@@ -11,8 +11,6 @@
 		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$IPAddress:50000"
 	else
 		add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
-		#add_kernel_params "agent.config_file=/etc/offline-agent-config.toml"
-		#cp_to_guest_img "etc" "${test_coco_path}/../config/offline-agent-config.toml"
 		cp_to_guest_img "etc" "${test_coco_path}/../tmp/aa-offline_fs_kbc-resources.json"
 	fi
 

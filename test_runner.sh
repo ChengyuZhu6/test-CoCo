@@ -101,7 +101,8 @@ parse_args() {
 			echo "-d runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
 			run_operator_install
-			run_pod_spec_tests_config
+			run_un_pod_spec_tests_config
+			run_cosign_pod_spec_tests_config
 			run_operator_uninstall
 			;;
 		p) ;;
@@ -160,6 +161,25 @@ generate_tests() {
 	IMAGE="$1" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$1:$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
 	echo "$new_config"
 }
+generate_pod_spec_un_tests() {
+	local base_config="$TEST_COCO_PATH/../tests/pod_spec/un_pod_spec.template"
+	local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
+	IMAGE="$1" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$1:$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
+	echo "$new_config"
+}
+generate_pod_spec_cosign_tests(){
+	local base_config=$1
+    local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
+    local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
+    local offline_new_config="$TEST_COCO_PATH/../tmp/aa-offline_fs_kbc-resources.json"
+    local p_b="$(cat $TEST_COCO_PATH/../config/policy.json | base64)"
+    local policy_base64=$(echo $p_b | tr -d '\n' | tr -d ' ')
+    local c_k_b="$(cat $TEST_COCO_PATH/../certs/cosign.pub | base64)"
+    local cosign_key_base64=$(echo $c_k_b | tr -d '\n' | tr -d ' ')
+    POLICY_BASE64="$policy_base64" COSIGN_KEY_BASE64="$cosign_key_base64" envsubst <"$offline_base_config" >"$offline_new_config"
+    IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" POD_NUM="$5" POD_CPU_NUM="$6" POD_MEM_SIZE="$7" rtcs="\$rtcs" pod_config="\$pod_config" IPAddress="$IPAddress" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
+    echo "$new_config"
+}
 run_operator_install() {
 	tests_passing="Test install operator"
 	echo "$(bats -f "$tests_passing" \
@@ -178,13 +198,13 @@ run_operator_uninstall() {
 		"$TEST_COCO_PATH/../templates/operator_uninstall.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/operator_uninstall.xml
 }
-run_pod_spec_tests_config() {
+run_un_pod_spec_tests_config() {
 	test_pod_for_ccruntime
 	if [ $? -eq 1 ]; then
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
-	local new_pod_configs="$TEST_COCO_PATH/../tmp/pod_spec.bats"
+	local new_pod_configs="$TEST_COCO_PATH/../tmp/un_pod_spec.bats"
 	local str="Test_pod_spec_for_unencrypted_unsigned_image"
 	echo -e "load ../run/lib.sh " | tee -a $new_pod_configs >/dev/null
 
@@ -193,10 +213,33 @@ run_pod_spec_tests_config() {
 	runtimeclass=$Current_RuntimeClass
 	for cpunums in ${CPUCONFIG[@]}; do
 		for memsize in ${MEMCONFIG[@]}; do
-			cat "$(generate_tests ci-$image $image_size $runtimeclass 1 $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
+			cat "$(generate_pod_spec_un_tests ci-$image $image_size $runtimeclass 1 $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
 		done
 	done
-	echo "$(bats "$TEST_COCO_PATH/../tmp/pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+	echo "$(bats "$TEST_COCO_PATH/../tmp/un_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
+	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	rm -rf $TEST_COCO_PATH/../tmp/*
+}
+run_cosign_pod_spec_tests_config() {
+	test_pod_for_ccruntime
+	if [ $? -eq 1 ]; then
+		echo "ERROR: cc runtimes are not deployed"
+		return 1
+	fi
+	local pod_configs="$TEST_COCO_PATH/../tests/pod_spec/cosigned_pod_spec.template"
+	local new_pod_configs="$TEST_COCO_PATH/../tmp/cosigned_pod_spec.bats"
+	local str="Test_pod_spec_for_cosigned_image"
+	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
+
+	local image="nginx"
+	image_size=$(docker image ls | grep $(echo ci-$image | tr A-Z a-z) | head -1 | awk '{print $7}')
+	runtimeclass=$Current_RuntimeClass
+	for cpunums in ${CPUCONFIG[@]}; do
+		for memsize in ${MEMCONFIG[@]}; do
+			cat "$(generate_pod_spec_cosign_tests $pod_configs  ci-$image $image_size $runtimeclass 1 $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
+		done
+	done
+	echo "$(bats "$TEST_COCO_PATH/../tmp/cosigned_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
 	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 }

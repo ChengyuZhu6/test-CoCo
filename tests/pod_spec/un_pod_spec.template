@@ -4,8 +4,8 @@
 		switch_measured_rootfs_verity_scheme none
 		add_kernel_params "agent.https_proxy=http://child-prc.intel.com:913"
 		add_kernel_params "agent.no_proxy=*.sh.intel.com,10.*"
-		pod_config="$(new_pod_config $TEST_COCO_PATH/../fixtures/multiple_pod_spec-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE" "1" "$POD_CPU_NUM" "$POD_MEM_SIZE")"
+		pod_config="$(new_pod_config $TEST_COCO_PATH/../tests/pod_spec/fixtures/pod_spec.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE" "1" "$POD_CPU_NUM" "$POD_MEM_SIZE")"
 		unencrypted_unsigned_image_from_unprotected_registry $pod_config
 		multiple_pods_delete
-		rm $TEST_COCO_PATH/../fixtures/multiple_pod_spec-config.yaml.in.*		
+		rm $TEST_COCO_PATH/../fixtures/pod_spec.yaml.in.*		
 }
