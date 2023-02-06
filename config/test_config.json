@@ -14,7 +14,8 @@
 			"kata-clh-tdx-eaa-kbc"
 		],
 		"podNum": [
-			"1"
+			"1",
+			"2"
 		],
 		"cpuNum": [
 			"200",
@@ -29,8 +30,7 @@
 	"file": {
 		"commentsImageLists": [
 			"ubuntu",
-			"nginx",
-			"rust"
+			"nginx"
 		],
 		"notCommentsImageLists": [
 			"example256M",
@@ -43,8 +43,7 @@
 		],
 		"imageLists": [
 			"ubuntu",
-			"nginx",
-			"rust"
+			"nginx"
 		],
 		"operatorVersion": "0.3.0"
 	},

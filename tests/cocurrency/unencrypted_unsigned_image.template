@@ -1,0 +1,14 @@
+
+@test "Test_cocurrency_unencrypted_unsigned_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_NUM}PODs" {
+		set_runtimeclass_config $RUNTIMECLASSNAME
+		switch_measured_rootfs_verity_scheme none
+		add_kernel_params "agent.https_proxy=http://child-prc.intel.com:913"
+		add_kernel_params "agent.no_proxy=*.sh.intel.com,10.*"
+		for COUNTS in {1..$POD_NUM}
+		do
+			pod_config="$(new_pod_config_cocurrency $TEST_COCO_PATH/../tests/cocurrency/fixtures/cocurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE" "$COUNTS")"
+			unencrypted_unsigned_image_from_unprotected_registry $pod_config
+		done
+		multiple_pods_delete
+		
+}

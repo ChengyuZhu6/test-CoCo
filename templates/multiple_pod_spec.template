@@ -1,5 +1,5 @@
 
-@test "Test_multiple_pod_spec_and_images $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_NUM}PODs ${POD_CPU_NUM}CPUs ${POD_MEM_SIZE}GB" {
+@test "Test_unencrypted_unsigned_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_NUM}PODs ${POD_CPU_NUM}CPUs ${POD_MEM_SIZE}GB" {
 		set_runtimeclass_config $RUNTIMECLASSNAME
 		switch_measured_rootfs_verity_scheme none
 		add_kernel_params "agent.https_proxy=http://child-prc.intel.com:913"
