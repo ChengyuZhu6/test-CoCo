@@ -536,7 +536,7 @@ setup_eaa_kbc_agent_config_in_guest() {
     # cat "${rootfs_agent_config}"
 }
 setup_eaa_decryption_files_in_guest() {
-    add_kernel_params "agent.aa_kbc_params=eaa_kbc::10.112.240.208:50000"
+    add_kernel_params "agent.aa_kbc_params=eaa_kbc::$(hostname -I | awk '{print $1}'):50000"
     cat <<-EOF >/opt/verdictd/keys/84688df7-2c0c-40fa-956b-29d8e74d16c0
 1234567890123456789012345678901
 EOF
@@ -712,6 +712,45 @@ generate_tests_cosign_image() {
     IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" rtcs="\$rtcs" pod_config="\$pod_config" IPAddress="$IPAddress" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
 
     echo "$new_config"
+}
+generate_tests() {
+	local base_config="$TEST_COCO_PATH/../templates/multiple_pod_spec.template"
+	local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
+	IMAGE="$1" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$1:$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
+	echo "$new_config"
+}
+generate_image_size_un_tests() {
+	local base_config="$TEST_COCO_PATH/../tests/image/unencrypted_unsigned_image.template"
+	local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
+	IMAGE="$1" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$1:$VERSION" POD_NUM="$4" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" envsubst <"$base_config" >"$new_config"
+	echo "$new_config"
+}
+generate_pod_spec_un_tests() {
+	local base_config="$TEST_COCO_PATH/../tests/pod_spec/un_pod_spec.template"
+	local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
+	IMAGE="$1" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$1:$VERSION" POD_NUM="$4" POD_CPU_NUM="$5" POD_MEM_SIZE="$6" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" status="\$status" envsubst <"$base_config" >"$new_config"
+	echo "$new_config"
+}
+generate_pod_spec_cosign_tests() {
+	local base_config=$1
+	local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
+	local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
+	local offline_new_config="$TEST_COCO_PATH/../tmp/aa-offline_fs_kbc-resources.json"
+	local p_b="$(cat $TEST_COCO_PATH/../config/policy.json | base64)"
+	local policy_base64=$(echo $p_b | tr -d '\n' | tr -d ' ')
+	local c_k_b="$(cat $TEST_COCO_PATH/../certs/cosign.pub | base64)"
+	local cosign_key_base64=$(echo $c_k_b | tr -d '\n' | tr -d ' ')
+	POLICY_BASE64="$policy_base64" COSIGN_KEY_BASE64="$cosign_key_base64" envsubst <"$offline_base_config" >"$offline_new_config"
+	IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" POD_NUM="$5" POD_CPU_NUM="$6" POD_MEM_SIZE="$7" rtcs="\$rtcs" pod_config="\$pod_config" IPAddress="$IPAddress" pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
+	echo "$new_config"
+}
+generate_pod_spec_eaa_kbc_tests() {
+	local base_config=$1
+	local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
+
+	IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" pod_config="\$pod_config" test_coco_path="\${TEST_COCO_PATH}" VERDICTDID="\$VERDICTDID" POD_NUM="$5" POD_CPU_NUM="$6" POD_MEM_SIZE="$7" rtcs="\$rtcs" envsubst <"$base_config" >"$new_config"
+
+	echo "$new_config"
 }
 #"$test_tag Test can pull an unencrypted unsigned image from an unprotected registry"
 unencrypted_unsigned_image_from_unprotected_registry() {

@@ -29,7 +29,8 @@
 	"file": {
 		"commentsImageLists": [
 			"ubuntu",
-			"nginx"
+			"nginx",
+			"rust"
 		],
 		"notCommentsImageLists": [
 			"example256M",
@@ -41,9 +42,9 @@
 			"example16G"
 		],
 		"imageLists": [
-			"example256M",
-			"example512M",
-			"example1G"
+			"ubuntu",
+			"nginx",
+			"rust"
 		],
 		"operatorVersion": "0.3.0"
 	},
