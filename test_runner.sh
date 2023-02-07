@@ -394,7 +394,7 @@ run_encrypted_image_config() {
 	# fi
 	for image in ${IMAGE_LISTS[@]}; do
 		image=$(echo $image | tr A-Z a-z)
-		docker pull $image
+		#docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		cat "$(generate_tests_encrypted_image "$TEST_COCO_PATH/../templates/encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
@@ -420,7 +420,7 @@ run_offline_encrypted_image_config() {
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${IMAGE_LISTS[@]}; do
 		image=$(echo $image | tr A-Z a-z)
-		docker pull $image
+		#docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/offline_encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
@@ -445,7 +445,7 @@ run_concurrency_unencrypted_unsigned_image_config() {
 	local str="Test_concurrency_unencrypted_unsigned_image"
 	echo -e "load ../run/lib.sh " | tee -a $new_pod_configs >/dev/null
 	for image in ${IMAGE_LISTS[@]}; do
-		# docker pull $image
+		# #docker pull $image
 		# echo $image
 		image=$(echo $image | tr A-Z a-z)
 		for podnum in ${PODNUMCONFIG[@]}; do
@@ -472,7 +472,7 @@ run_concurrency_signed_image_config() {
 	local str="Test_concurrency_simple_signed_image"
 	for image in ${IMAGE_LISTS[@]}; do
 		image=$(echo $image | tr A-Z a-z)
-		docker pull $image
+		#docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		for podnum in ${PODNUMCONFIG[@]}; do
@@ -498,7 +498,7 @@ run_concurrency_cosigned_image_config() {
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${IMAGE_LISTS[@]}; do
 		image=$(echo $image | tr A-Z a-z)
-		docker pull $image
+		#docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		for podnum in ${PODNUMCONFIG[@]}; do
@@ -523,7 +523,7 @@ run_concurrency_encrypted_image_config() {
 
 	for image in ${IMAGE_LISTS[@]}; do
 		image=$(echo $image | tr A-Z a-z)
-		# docker pull $image
+		# #docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		for podnum in ${PODNUMCONFIG[@]}; do
@@ -549,7 +549,7 @@ run_concurrency_offline_encrypted_image_config() {
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${IMAGE_LISTS[@]}; do
 		image=$(echo $image | tr A-Z a-z)
-		# docker pull $image
+		# #docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		for podnum in ${PODNUMCONFIG[@]}; do
@@ -573,7 +573,7 @@ run_measured_boot_image_config() {
 	local new_pod_configs="$TEST_COCO_PATH/../tmp/measured_boot.bats"
 	local str="Test_measured_boot"
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
-	docker pull busybox
+	#docker pull busybox
 	image_size=$(docker image ls | grep "busybox" | head -1 | awk '{print $7}')
 	# for runtimeclass in ${RUNTIMECLASS[@]}; do
 	runtimeclass=$Current_RuntimeClass
@@ -597,7 +597,7 @@ run_auth_registry_image_config() {
 	local str="Test_auth_registry"
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${EXAMPLE_IMAGE_LISTS[@]}; do
-		docker pull $image
+		#docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		# for runtimeclass in ${RUNTIMECLASS[@]}; do
