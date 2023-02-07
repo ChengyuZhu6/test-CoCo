@@ -897,8 +897,8 @@ get_certs_from_remote() {
         update-ca-trust
     fi
     set_docker_certs
-    pull_image
-    create_image_size
+    # pull_image
+    # create_image_size
 }
 run_registry() {
     local LOCAL_REGISTRY_NAME="zcy-Z390-AORUS-MASTER.sh.intel.com"
