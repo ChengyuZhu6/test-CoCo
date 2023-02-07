@@ -121,13 +121,13 @@ summary_result_for_pod_spec() {
     local input_str=""
     mem_nums=$(jq -r '.config.memSize[]' $TEST_COCO_PATH/../config/test_config.json)
     cpu_nums=$(jq -r '.config.cpuNum[]' $TEST_COCO_PATH/../config/test_config.json)
-    echo $sub_line
+    # echo $sub_line
     for ns in ${sub_line[@]}; do
         mem_size=$(sed -n ${ns}p $file_path | grep ' name=' | awk -F '=' '{print $3}' | cut -d ' ' -f7 | cut -d '"' -f1 | sed 's/[^0-9 ]//g')
-        echo $men_size
+        # echo $men_size
         cpu_num=$(sed -n ${ns}p $file_path | grep ' name=' | awk -F '=' '{print $3}' | cut -d ' ' -f6 | cut -d '"' -f1 | sed 's/[^0-9 ]//g')
         running_time=$(sed -n ${ns}p $file_path | grep ' time=' | awk -F '=' '{print $4}' | cut -d ' ' -f1 | cut -d '"' -f2)
-        echo $men_size"+"$cpu_num
+        # echo $men_size"+"$cpu_num
         all_pod_spec[$men_size"+"$cpu_num]=$running_time
     done
 
@@ -138,8 +138,8 @@ summary_result_for_pod_spec() {
         done
         echo "$input_str" | tee -a $csv_file_for_pod_spec
     done
-
-    generate_xls $csv_file_for_pod_spec
+    echo "$3"
+    generate_xls $csv_file_for_pod_spec $3
 }
 split_content_for_function() {
     local nu_res=$(find $1/$2 -name '*.xml' | wc -l)
@@ -212,13 +212,13 @@ split_content_for_pod_spec() {
     done
 }
 generate_xls() {
-    python3 $TEST_COCO_PATH/../run/generate_xls.py $1
+    python3 $TEST_COCO_PATH/../run/generate_xls.py $1 $2
     # rm $TEST_COCO_PATH/../report/*.xml
 }
 
 main() {
     file_base_dir="$TEST_COCO_PATH/../report"
-    sub_dir="image"
+    sub_dir="$1"
     horizontal_axis=""
     case $sub_dir in
 

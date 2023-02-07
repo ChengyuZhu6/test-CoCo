@@ -159,7 +159,7 @@ Test_uninstall_operator() {
 Test_cosign_image() {
 	local IMAGE="nginx"
 	local RUNTIMECLASSNAME="kata-qemu"
-	local REGISTRTYIMAGE="zcy-Z390-AORUS-MASTER.sh.intel.com/nginx:latest"
+	local REGISTRTYIMAGE="ngcn-registry.sh.intel.com/ci-example2g:latest"
 	generate_cosign_image $(echo $REGISTRTYIMAGE | cut -d ":" -f1)
 	local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
 	local offline_new_config="$TEST_COCO_PATH/../tmp/aa-offline_fs_kbc-resources.json"
@@ -249,10 +249,7 @@ tests() {
 main() {
 	setup
 	read_config
-	get_certs_from_remote
-	set_runtimeclass_config kata-qemu
-	$TEST_COCO_PATH/../run/losetup-crt.sh "/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest.image" c
-	$TEST_COCO_PATH/../run/losetup-crt.sh "/opt/confidential-containers/share/kata-containers/kata-ubuntu-latest-tdx.image" c
+	Test_cosign_image
 	# Test_signed_image
 	# Test_install_operator
 	# get_certs_from_remote

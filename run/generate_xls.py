@@ -1,7 +1,8 @@
 import xlwt
 import sys
 import csv
-print(len(sys.argv[1]))
+
+    
 csv_file_path= str(sys.argv[1])
 wbk = xlwt.Workbook(encoding="utf-8") # 创建 xls 文件,可被复写
 datasheet = wbk.add_sheet("Function_tests") # 创建一个名为sheet1的sheet
@@ -72,6 +73,15 @@ with open(csv_file_path) as f:
         co = 0
 
 base_dir_path=csv_file_path.rsplit('/',1)[0]
-file_name=csv_file_path.rsplit('/',1)[1]
-names=file_name.rsplit('.',3)[0]
-wbk.save(base_dir_path+"/"+names+"/Function_Test_Result_of_CoCo_on_MVP.xls") # 保存
+if len(sys.argv) > 2:
+    file_name=csv_file_path.rsplit('/',1)[1]
+    names=file_name.rsplit('.',3)[0]
+    wbk.save(base_dir_path+"/Function_Test_Result_of_CoCo_on_MVP.xls") # 保存
+else:
+    file_name=csv_file_path.rsplit('/',1)[1]
+    names=file_name.rsplit('.',3)[0]
+    wbk.save(base_dir_path+"/Function_Test_Result_of_CoCo_on_MVP.xls") # 保存
+# file_name=csv_file_path.rsplit('/',1)[1]
+# names=file_name.rsplit('.',3)[0]
+# print(names)
+# wbk.save(base_dir_path+"/"+names+"/Function_Test_Result_of_CoCo_on_MVP.xls") # 保存

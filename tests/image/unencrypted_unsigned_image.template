@@ -10,6 +10,5 @@
 			unencrypted_unsigned_image_from_unprotected_registry $pod_config
 		done
 		multiple_pods_delete
-		rm $TEST_COCO_PATH/../fixtures/unsigned-uncrypted-images-config.yaml.in.*
 		
 }

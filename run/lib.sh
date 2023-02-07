@@ -688,14 +688,13 @@ generate_cosign_image() {
     local img_name=$(echo $img | cut -d "/" -f2)
     docker tag $img $registrys/cosigned/$img_name:cosigned
     docker push $registrys/cosigned/$img_name:cosigned
-    IMG_DIGEST=$registrys/cosigned/$img_name:cosigned@$(docker images --digests | grep "${img}" | grep cosigned | awk '{print $3}' | sed -n "1,1p")
+    IMG_DIGEST=$registrys/cosigned/$img_name:cosigned@$(docker images --digests | grep "$registrys/cosigned/$img_name" | grep cosigned | awk '{print $3}' | sed -n "1,1p")
     /usr/bin/expect <<-EOF
 	spawn cosign sign --key $TEST_COCO_PATH/../config/cosign.key $IMG_DIGEST
     expect "Enter password for private key:"
     send "intel\r"
     expect eof
 EOF
-    cp /usr/local/bin/cosign-linux-amd64 /usr/local/bin/cosign
 
 }
 generate_tests_cosign_image() {
