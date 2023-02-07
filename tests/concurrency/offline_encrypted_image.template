@@ -1,4 +1,4 @@
-@test "Test_cocurrency_offline_encrypted_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_NUM}PODs" {
+@test "Test_concurrency_offline_encrypted_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_NUM}PODs" {
 	set_runtimeclass_config $RUNTIMECLASSNAME
 	#clear_kernel_params
 	remove_kernel_param "agent.aa_kbc_params"
@@ -14,7 +14,7 @@
 
 	for COUNTS in {1..$POD_NUM}
 	do
-		pod_config="$(new_pod_config_concurrency $TEST_COCO_PATH/../tests/cocurrency/fixtures/cocurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE:offline-encrypted" "$COUNTS")"
+		pod_config="$(new_pod_config_concurrency $TEST_COCO_PATH/../tests/concurrency/fixtures/concurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE:offline-encrypted" "$COUNTS")"
 		unencrypted_unsigned_image_from_unprotected_registry $pod_config
 	done
 	multiple_pods_delete

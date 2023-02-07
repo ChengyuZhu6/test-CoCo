@@ -1,4 +1,4 @@
-@test "Test_cocurrency_eaa_kbc_encrypted_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_NUM}PODs" {
+@test "Test_concurrency_eaa_kbc_encrypted_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_NUM}PODs" {
 	#skip  
 	set_runtimeclass_config $RUNTIMECLASSNAME
 	if [ $(echo ${RUNTIMECLASSNAME} | grep tdx | wc -l) -le 0 ]; then
@@ -15,7 +15,7 @@
 	setup_eaa_decryption_files_in_guest
 	for COUNTS in {1..$POD_NUM}
 	do
-		pod_config="$(new_pod_config_concurrency $TEST_COCO_PATH/../tests/cocurrency/fixtures/cocurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRY_NAME/$IMAGE:encrypted" "$COUNTS")"
+		pod_config="$(new_pod_config_concurrency $TEST_COCO_PATH/../tests/concurrency/fixtures/concurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRY_NAME/$IMAGE:encrypted" "$COUNTS")"
 		unencrypted_unsigned_image_from_unprotected_registry $pod_config
 	done
 	multiple_pods_delete

@@ -1,4 +1,4 @@
-@test "Test_cocurrency_simple_signed_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_NUM}PODs" {
+@test "Test_concurrency_simple_signed_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_NUM}PODs" {
 	set_runtimeclass_config $RUNTIMECLASSNAME
 	switch_measured_rootfs_verity_scheme none
 	remove_kernel_param "agent.enable_signature_verification"
@@ -18,7 +18,7 @@
 	fi
 	for COUNTS in {1..$POD_NUM}
 	do
-		pod_config="$(new_pod_config_concurrency ${test_coco_path}/../tests/cocurrency/fixtures/cocurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed" "$COUNTS")"
+		pod_config="$(new_pod_config_concurrency ${test_coco_path}/../tests/concurrency/fixtures/concurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed" "$COUNTS")"
 		unencrypted_unsigned_image_from_unprotected_registry $pod_config
 	done
 	multiple_pods_delete
