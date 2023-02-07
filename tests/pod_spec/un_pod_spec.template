@@ -7,5 +7,4 @@
 		pod_config="$(new_pod_config $TEST_COCO_PATH/../tests/pod_spec/fixtures/pod_spec.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE" "1" "$POD_CPU_NUM" "$POD_MEM_SIZE")"
 		unencrypted_unsigned_image_from_unprotected_registry $pod_config
 		multiple_pods_delete
-		rm $TEST_COCO_PATH/../fixtures/pod_spec.yaml.in.*		
 }

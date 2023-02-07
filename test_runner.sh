@@ -242,7 +242,7 @@ run_eaa_kbc_pod_spec_tests_config() {
 	runtimeclass=$Current_RuntimeClass
 	for cpunums in ${CPUCONFIG[@]}; do
 		for memsize in ${MEMCONFIG[@]}; do
-			cat "$(generate_pod_spec_eaa_kbc_tests "$TEST_COCO_PATH/../templates/encrypted_image.template" ci-$image $image_size $runtimeclass 1 $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
+			cat "$(generate_pod_spec_eaa_kbc_tests "$TEST_COCO_PATH/../tests/pod_spec/eaa_kbc_pod_spec.template" ci-$image $image_size $runtimeclass 1 $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
 			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
 		done
 	done
