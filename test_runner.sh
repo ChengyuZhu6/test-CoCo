@@ -298,7 +298,7 @@ run_unencrypted_unsigned_image_config() {
 	if [ ! -d $TEST_COCO_PATH/../report/image ]; then
 		mkdir -p $TEST_COCO_PATH/../report/image
 	fi
-	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/unencrypted_unsigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
+	echo "$(bats  "$TEST_COCO_PATH/../tmp/unencrypted_unsigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
 	mv $TEST_COCO_PATH/../report/image/report.xml $TEST_COCO_PATH/../report/image/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 }
@@ -350,7 +350,7 @@ run_signed_image_config() {
 	if [ ! -d $TEST_COCO_PATH/../report/image ]; then
 		mkdir -p $TEST_COCO_PATH/../report/image
 	fi
-	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/signed_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
+	echo "$(bats  "$TEST_COCO_PATH/../tmp/signed_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
 	mv $TEST_COCO_PATH/../report/image/report.xml $TEST_COCO_PATH/../report/image/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/signed_image-config.yaml.in.*
@@ -375,7 +375,7 @@ run_cosigned_image_config() {
 	if [ ! -d $TEST_COCO_PATH/../report/image ]; then
 		mkdir -p $TEST_COCO_PATH/../report/image
 	fi
-	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/cosigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
+	echo "$(bats  "$TEST_COCO_PATH/../tmp/cosigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
 	mv $TEST_COCO_PATH/../report/image/report.xml $TEST_COCO_PATH/../report/image/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/cosign-config.yaml.in.*
@@ -404,7 +404,7 @@ run_encrypted_image_config() {
 	if [ ! -d $TEST_COCO_PATH/../report/image ]; then
 		mkdir -p $TEST_COCO_PATH/../report/image
 	fi
-	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
+	echo "$(bats  "$TEST_COCO_PATH/../tmp/encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
 	mv $TEST_COCO_PATH/../report/image/report.xml $TEST_COCO_PATH/../report/image/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/encrypted_image-config.yaml.in.*
@@ -429,7 +429,7 @@ run_offline_encrypted_image_config() {
 	if [ ! -d $TEST_COCO_PATH/../report/image ]; then
 		mkdir -p $TEST_COCO_PATH/../report/image
 	fi
-	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/offline_encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
+	echo "$(bats  "$TEST_COCO_PATH/../tmp/offline_encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
 	mv $TEST_COCO_PATH/../report/image/report.xml $TEST_COCO_PATH/../report/image/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/offline-encrypted-config.yaml.in.*
