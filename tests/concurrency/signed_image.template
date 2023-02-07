@@ -18,7 +18,7 @@
 	fi
 	for COUNTS in {1..$POD_NUM}
 	do
-		pod_config="$(new_pod_config_cocurrency ${test_coco_path}/../tests/cocurrency/fixtures/cocurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed" "$COUNTS")"
+		pod_config="$(new_pod_config_concurrency ${test_coco_path}/../tests/cocurrency/fixtures/cocurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed" "$COUNTS")"
 		unencrypted_unsigned_image_from_unprotected_registry $pod_config
 	done
 	multiple_pods_delete

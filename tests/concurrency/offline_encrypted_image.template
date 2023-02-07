@@ -14,7 +14,7 @@
 
 	for COUNTS in {1..$POD_NUM}
 	do
-		pod_config="$(new_pod_config_cocurrency $TEST_COCO_PATH/../tests/cocurrency/fixtures/cocurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE:offline-encrypted" "$COUNTS")"
+		pod_config="$(new_pod_config_concurrency $TEST_COCO_PATH/../tests/cocurrency/fixtures/cocurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE:offline-encrypted" "$COUNTS")"
 		unencrypted_unsigned_image_from_unprotected_registry $pod_config
 	done
 	multiple_pods_delete
