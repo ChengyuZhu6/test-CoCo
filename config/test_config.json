@@ -18,13 +18,12 @@
 			"2"
 		],
 		"cpuNum": [
-			"200",
-			"400"
+			"1",
+			"2"
 		],
 		"memSize": [
-			"2",
-			"8",
-			"32"
+			"1",
+			"2"
 		]
 	},
 	"file": {
@@ -42,8 +41,8 @@
 			"example16G"
 		],
 		"imageLists": [
-			"ubuntu",
-			"nginx"
+			"example1G",
+			"example2G"
 		],
 		"operatorVersion": "0.3.0"
 	},

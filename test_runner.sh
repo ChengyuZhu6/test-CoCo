@@ -116,13 +116,13 @@ parse_args() {
 			echo "-c runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
 			export IMAGE_LISTS=$(jq -r .file.commentsImageLists[] $TEST_COCO_PATH/../config/test_config.json)
-			# run_operator_install
-			run_cocurrency_unencrypted_unsigned_image_config
-			run_cocurrency_encrypted_image_config
-			run_cocurrency_offline_encrypted_image_config
-			run_cocurrency_signed_image_config
-			run_cocurrency_cosigned_image_config
-			# run_operator_uninstall
+			run_operator_install
+			run_concurrency_unencrypted_unsigned_image_config
+			run_concurrency_encrypted_image_config
+			run_concurrency_offline_encrypted_image_config
+			run_concurrency_signed_image_config
+			run_concurrency_cosigned_image_config
+			run_operator_uninstall
 			;;
 		a)
 			echo "-a runtime: $OPTARG "
@@ -196,8 +196,11 @@ run_un_pod_spec_tests_config() {
 			cat "$(generate_pod_spec_un_tests ci-$image $image_size $runtimeclass 1 $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
 		done
 	done
-	echo "$(bats "$TEST_COCO_PATH/../tmp/un_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/pod_spec ]; then
+		mkdir -p $TEST_COCO_PATH/../report/pod_spec
+	fi
+	echo "$(bats "$TEST_COCO_PATH/../tmp/un_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/pod_spec/)"
+	mv $TEST_COCO_PATH/../report/pod_spec/report.xml $TEST_COCO_PATH/../report/pod_spec/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 }
 run_cosign_pod_spec_tests_config() {
@@ -219,8 +222,11 @@ run_cosign_pod_spec_tests_config() {
 			cat "$(generate_pod_spec_cosign_tests $pod_configs ci-$image $image_size $runtimeclass 1 $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
 		done
 	done
-	echo "$(bats "$TEST_COCO_PATH/../tmp/cosigned_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/pod_spec ]; then
+		mkdir -p $TEST_COCO_PATH/../report/pod_spec
+	fi
+	echo "$(bats "$TEST_COCO_PATH/../tmp/cosigned_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/pod_spec/)"
+	mv $TEST_COCO_PATH/../report/pod_spec/report.xml $TEST_COCO_PATH/../report/pod_spec/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 }
 run_eaa_kbc_pod_spec_tests_config() {
@@ -234,13 +240,20 @@ run_eaa_kbc_pod_spec_tests_config() {
 	local image="nginx"
 	image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 	runtimeclass=$Current_RuntimeClass
-	cat "$(generate_pod_spec_eaa_kbc_tests "$TEST_COCO_PATH/../templates/encrypted_image.template" ci-$image $image_size $runtimeclass 1 $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
-	tests_passing+="|${str} ci-$image $image_size $runtimeclass"
+	for cpunums in ${CPUCONFIG[@]}; do
+		for memsize in ${MEMCONFIG[@]}; do
+			cat "$(generate_pod_spec_eaa_kbc_tests "$TEST_COCO_PATH/../templates/encrypted_image.template" ci-$image $image_size $runtimeclass 1 $cpunums $memsize)" | tee -a $new_pod_configs >/dev/null
+			tests_passing+="|${str} ci-$image $image_size $runtimeclass"
+		done
+	done
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 
+	if [ ! -d $TEST_COCO_PATH/../report/pod_spec ]; then
+		mkdir -p $TEST_COCO_PATH/../report/pod_spec
+	fi
 	echo "$(bats -f "$tests_passing" \
-		"$TEST_COCO_PATH/../tmp/eaa_kbc_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+		"$TEST_COCO_PATH/../tmp/eaa_kbc_pod_spec.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/pod_spec/)"
+	mv $TEST_COCO_PATH/../report/pod_spec/report.xml $TEST_COCO_PATH/../report/pod_spec/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 }
 run_function_tests_config() {
@@ -254,9 +267,13 @@ run_function_tests_config() {
 	local image="nginx"
 	image_size=$(docker image ls | grep $(echo ci-$image | tr A-Z a-z) | head -1 | awk '{print $7}')
 	runtimeclass=$Current_RuntimeClass
+
 	cat "$(insert_params_into_function_tests "$pod_configs" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
-	echo "$(bats "$new_pod_configs" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/function ]; then
+		mkdir -p $TEST_COCO_PATH/../report/function
+	fi
+	echo "$(bats "$new_pod_configs" --report-formatter junit --output $TEST_COCO_PATH/../report/function/)"
+	mv $TEST_COCO_PATH/../report/function/report.xml $TEST_COCO_PATH/../report/function/$(basename ${new_pod_configs}).xml
 	rm -f $TEST_COCO_PATH/../tmp/*
 	rm -f $TEST_COCO_PATH/../fixtures/*.in.*
 }
@@ -278,8 +295,11 @@ run_unencrypted_unsigned_image_config() {
 		cat "$(generate_image_size_un_tests ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 		tests_passing+="|${str} ci-$image $image_size $runtimeclass "
 	done
-	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/unencrypted_unsigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/image ]; then
+		mkdir -p $TEST_COCO_PATH/../report/image
+	fi
+	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/unencrypted_unsigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
+	mv $TEST_COCO_PATH/../report/image/report.xml $TEST_COCO_PATH/../report/image/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 }
 run_trust_storage_config() {
@@ -327,8 +347,11 @@ run_signed_image_config() {
 		tests_passing+="|${str} ci-$image $image_size $runtimeclass "
 	done
 	echo -e "load ../run/lib.sh \n  \n read_config" | tee -a $new_pod_configs >/dev/null
-	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/signed_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/image ]; then
+		mkdir -p $TEST_COCO_PATH/../report/image
+	fi
+	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/signed_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
+	mv $TEST_COCO_PATH/../report/image/report.xml $TEST_COCO_PATH/../report/image/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/signed_image-config.yaml.in.*
 }
@@ -349,9 +372,11 @@ run_cosigned_image_config() {
 		cat "$(generate_tests_cosign_image "$TEST_COCO_PATH/../templates/cosigned_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 		tests_passing+="|${str} ci-$image $image_size $runtimeclass "
 	done
-
-	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/cosigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/image ]; then
+		mkdir -p $TEST_COCO_PATH/../report/image
+	fi
+	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/cosigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
+	mv $TEST_COCO_PATH/../report/image/report.xml $TEST_COCO_PATH/../report/image/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/cosign-config.yaml.in.*
 }
@@ -376,12 +401,11 @@ run_encrypted_image_config() {
 		tests_passing+="|${str} ci-$image $image_size $runtimeclass "
 	done
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
-
-	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	# VERDICTDID=$(ps ux | grep "verdictd " | grep -v "grep" | awk '{print $2}')
-	# echo $VERDICTDID
-	# kill -9 $VERDICTDID
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/image ]; then
+		mkdir -p $TEST_COCO_PATH/../report/image
+	fi
+	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
+	mv $TEST_COCO_PATH/../report/image/report.xml $TEST_COCO_PATH/../report/image/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/encrypted_image-config.yaml.in.*
 }
@@ -402,21 +426,23 @@ run_offline_encrypted_image_config() {
 		cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/offline_encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 		tests_passing+="|${str} ci-$image $image_size $runtimeclass "
 	done
-
-	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/offline_encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/image ]; then
+		mkdir -p $TEST_COCO_PATH/../report/image
+	fi
+	echo "$(bats -f "$tests_passing" "$TEST_COCO_PATH/../tmp/offline_encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/image/)"
+	mv $TEST_COCO_PATH/../report/image/report.xml $TEST_COCO_PATH/../report/image/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 	rm -rf $TEST_COCO_PATH/../fixtures/offline-encrypted-config.yaml.in.*
 }
 
-run_cocurrency_unencrypted_unsigned_image_config() {
+run_concurrency_unencrypted_unsigned_image_config() {
 	test_pod_for_ccruntime
 	if [ $? -eq 1 ]; then
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tmp/unencrypted_unsigned_image.bats"
-	local str="Test_cocurrency_unencrypted_unsigned_image"
+	local str="Test_concurrency_unencrypted_unsigned_image"
 	echo -e "load ../run/lib.sh " | tee -a $new_pod_configs >/dev/null
 	for image in ${IMAGE_LISTS[@]}; do
 		# docker pull $image
@@ -425,44 +451,50 @@ run_cocurrency_unencrypted_unsigned_image_config() {
 		for podnum in ${PODNUMCONFIG[@]}; do
 			image_size=$(docker image ls | grep $(echo ci-$image | tr A-Z a-z) | head -1 | awk '{print $7}')
 			runtimeclass=$Current_RuntimeClass
-			cat "$(generate_cocurrency_un_tests ci-$image $image_size $runtimeclass $podnum)" | tee -a $new_pod_configs >/dev/null
+			cat "$(generate_concurrency_un_tests ci-$image $image_size $runtimeclass $podnum)" | tee -a $new_pod_configs >/dev/null
 		done
 	done
-	echo "$(bats "$TEST_COCO_PATH/../tmp/unencrypted_unsigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/concurrency ]; then
+		mkdir -p $TEST_COCO_PATH/../report/concurrency
+	fi
+	echo "$(bats "$TEST_COCO_PATH/../tmp/unencrypted_unsigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/concurrency/)"
+	mv $TEST_COCO_PATH/../report/concurrency/report.xml $TEST_COCO_PATH/../report/concurrency/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 }
 
-run_cocurrency_signed_image_config() {
+run_concurrency_signed_image_config() {
 	test_pod_for_ccruntime
 	if [ $? -eq 1 ]; then
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tmp/signed_image.bats"
-	local str="Test_cocurrency_simple_signed_image"
+	local str="Test_concurrency_simple_signed_image"
 	for image in ${IMAGE_LISTS[@]}; do
 		image=$(echo $image | tr A-Z a-z)
 		docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		for podnum in ${PODNUMCONFIG[@]}; do
-			cat "$(generate_cocurrency_signed_tests "$TEST_COCO_PATH/../tests/cocurrency/signed_image.template" ci-$image $image_size $runtimeclass $podnum)" | tee -a $new_pod_configs >/dev/null
+			cat "$(generate_concurrency_signed_tests "$TEST_COCO_PATH/../tests/concurrency/signed_image.template" ci-$image $image_size $runtimeclass $podnum)" | tee -a $new_pod_configs >/dev/null
 		done
 	done
 	echo -e "load ../run/lib.sh \n  \n read_config" | tee -a $new_pod_configs >/dev/null
-	echo "$(bats "$TEST_COCO_PATH/../tmp/signed_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/concurrency ]; then
+		mkdir -p $TEST_COCO_PATH/../report/concurrency
+	fi
+	echo "$(bats "$TEST_COCO_PATH/../tmp/signed_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/concurrency/)"
+	mv $TEST_COCO_PATH/../report/concurrency/report.xml $TEST_COCO_PATH/../report/concurrency/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 }
-run_cocurrency_cosigned_image_config() {
+run_concurrency_cosigned_image_config() {
 	test_pod_for_ccruntime
 	if [ $? -eq 1 ]; then
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tmp/cosigned_image.bats"
-	local str="Test_cocurrency_cosigned_image"
+	local str="Test_concurrency_cosigned_image"
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${IMAGE_LISTS[@]}; do
 		image=$(echo $image | tr A-Z a-z)
@@ -470,22 +502,24 @@ run_cocurrency_cosigned_image_config() {
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		for podnum in ${PODNUMCONFIG[@]}; do
-			cat "$(generate_pod_spec_cosign_tests "$TEST_COCO_PATH/../tests/cocurrency/cosigned_image.template" ci-$image $image_size $runtimeclass $podnum)" | tee -a $new_pod_configs >/dev/null
+			cat "$(generate_pod_spec_cosign_tests "$TEST_COCO_PATH/../tests/concurrency/cosigned_image.template" ci-$image $image_size $runtimeclass $podnum)" | tee -a $new_pod_configs >/dev/null
 		done
 	done
-
-	echo "$(bats "$TEST_COCO_PATH/../tmp/cosigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/concurrency ]; then
+		mkdir -p $TEST_COCO_PATH/../report/concurrency
+	fi
+	echo "$(bats "$TEST_COCO_PATH/../tmp/cosigned_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/concurrency/)"
+	mv $TEST_COCO_PATH/../report/concurrency/report.xml $TEST_COCO_PATH/../report/concurrency/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 }
-run_cocurrency_encrypted_image_config() {
+run_concurrency_encrypted_image_config() {
 	test_pod_for_ccruntime
 	if [ $? -eq 1 ]; then
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tmp/encrypted_image.bats"
-	local str="Test_cocurrency_eaa_kbc_encrypted_image"
+	local str="Test_concurrency_eaa_kbc_encrypted_image"
 
 	for image in ${IMAGE_LISTS[@]}; do
 		image=$(echo $image | tr A-Z a-z)
@@ -493,22 +527,25 @@ run_cocurrency_encrypted_image_config() {
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		for podnum in ${PODNUMCONFIG[@]}; do
-			cat "$(generate_cocurrency_eaa_kbc_tests "$TEST_COCO_PATH/../tests/cocurrency/encrypted_image.template" ci-$image $image_size $runtimeclass $podnum)" | tee -a $new_pod_configs >/dev/null
+			cat "$(generate_concurrency_eaa_kbc_tests "$TEST_COCO_PATH/../tests/concurrency/encrypted_image.template" ci-$image $image_size $runtimeclass $podnum)" | tee -a $new_pod_configs >/dev/null
 		done
 	done
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
-	echo "$(bats "$TEST_COCO_PATH/../tmp/encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/concurrency ]; then
+		mkdir -p $TEST_COCO_PATH/../report/concurrency
+	fi
+	echo "$(bats "$TEST_COCO_PATH/../tmp/encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/concurrency/)"
+	mv $TEST_COCO_PATH/../report/concurrency/report.xml $TEST_COCO_PATH/../report/concurrency/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 }
-run_cocurrency_offline_encrypted_image_config() {
+run_concurrency_offline_encrypted_image_config() {
 	test_pod_for_ccruntime
 	if [ $? -eq 1 ]; then
 		echo "ERROR: cc runtimes are not deployed"
 		return 1
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tmp/offline_encrypted_image.bats"
-	local str="Test_cocurrency_offline_encrypted_image"
+	local str="Test_concurrency_offline_encrypted_image"
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${IMAGE_LISTS[@]}; do
 		image=$(echo $image | tr A-Z a-z)
@@ -516,12 +553,14 @@ run_cocurrency_offline_encrypted_image_config() {
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		for podnum in ${PODNUMCONFIG[@]}; do
-			cat "$(generate_cocurrency_offline_encrypted_image "$TEST_COCO_PATH/../tests/cocurrency/offline_encrypted_image.template" ci-$image $image_size $runtimeclass $podnum)" | tee -a $new_pod_configs >/dev/null
+			cat "$(generate_concurrency_offline_encrypted_image "$TEST_COCO_PATH/../tests/concurrency/offline_encrypted_image.template" ci-$image $image_size $runtimeclass $podnum)" | tee -a $new_pod_configs >/dev/null
 		done
 	done
-
-	echo "$(bats "$TEST_COCO_PATH/../tmp/offline_encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/)"
-	mv $TEST_COCO_PATH/../report/report.xml $TEST_COCO_PATH/../report/$(basename ${new_pod_configs}).xml
+	if [ ! -d $TEST_COCO_PATH/../report/concurrency ]; then
+		mkdir -p $TEST_COCO_PATH/../report/concurrency
+	fi
+	echo "$(bats "$TEST_COCO_PATH/../tmp/offline_encrypted_image.bats" --report-formatter junit --output $TEST_COCO_PATH/../report/concurrency/)"
+	mv $TEST_COCO_PATH/../report/concurrency/report.xml $TEST_COCO_PATH/../report/concurrency/$(basename ${new_pod_configs}).xml
 	rm -rf $TEST_COCO_PATH/../tmp/*
 }
 

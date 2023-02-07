@@ -725,13 +725,13 @@ generate_image_size_un_tests() {
 	IMAGE="$1" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$1:$VERSION" POD_NUM="$4" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" envsubst <"$base_config" >"$new_config"
 	echo "$new_config"
 }
-generate_cocurrency_un_tests() {
-	local base_config="$TEST_COCO_PATH/../tests/cocurrency/unencrypted_unsigned_image.template"
+generate_concurrency_un_tests() {
+	local base_config="$TEST_COCO_PATH/../tests/concurrency/unencrypted_unsigned_image.template"
 	local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
 	IMAGE="$1" IMAGE_SIZE="$2" RUNTIMECLASSNAME="$3" REGISTRTYIMAGE="$REGISTRY_NAME:$PORT/$1:$VERSION" POD_NUM="$4" pod_config="\$pod_config" TEST_COCO_PATH="$TEST_COCO_PATH" COUNTS="\$COUNTS" envsubst <"$base_config" >"$new_config"
 	echo "$new_config"
 }
-generate_cocurrency_signed_tests() {
+generate_concurrency_signed_tests() {
     local base_config=$1
     local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
 
@@ -739,7 +739,7 @@ generate_cocurrency_signed_tests() {
 
     echo "$new_config"
 }
-generate_cocurrency_cosign_tests() {
+generate_concurrency_cosign_tests() {
 	local base_config=$1
 	local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
 	local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
@@ -752,7 +752,7 @@ generate_cocurrency_cosign_tests() {
 	IMAGE="$2" IMAGE_SIZE="$3" RUNTIMECLASSNAME="$4" REGISTRTYIMAGE="$REGISTRY_NAME/$2" POD_NUM="$5" rtcs="\$rtcs" pod_config="\$pod_config" IPAddress="$IPAddress" COUNTS="\$COUNTS"pod_name="\$pod_name" test_coco_path="\${TEST_COCO_PATH}" pod_id="\$pod_id" envsubst <"$base_config" >"$new_config"
 	echo "$new_config"
 }
-generate_cocurrency_offline_encrypted_image() {
+generate_concurrency_offline_encrypted_image() {
     local base_config=$1
     local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
 
@@ -760,7 +760,7 @@ generate_cocurrency_offline_encrypted_image() {
 
     echo "$new_config"
 }
-generate_cocurrency_eaa_kbc_tests() {
+generate_concurrency_eaa_kbc_tests() {
 	local base_config=$1
 	local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
 
@@ -969,7 +969,7 @@ new_pod_config_normal() {
     IMAGE="$image" RUNTIMECLASSNAME="$runtimeclass" REGISTRTYIMAGE="$registryimage" envsubst <"$base_config" >"$new_config"
     echo "$new_config"
 }
-new_pod_config_cocurrency() {
+new_pod_config_concurrency() {
     local base_config="$1"
     local image="$2"
     local runtimeclass="$3"

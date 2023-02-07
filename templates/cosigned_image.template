@@ -1,7 +1,7 @@
 @test "Test_cosigned_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
 	set_runtimeclass_config $RUNTIMECLASSNAME
 	switch_measured_rootfs_verity_scheme none
-	#generate_cosign_image $(echo $REGISTRTYIMAGE | cut -d ":" -f1)
+	generate_cosign_image $(echo $REGISTRTYIMAGE | cut -d ":" -f1)
 	
 	pod_config="$(new_pod_config_normal ${test_coco_path}/../fixtures/cosign-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/cosigned/$IMAGE:cosigned")"
 	remove_kernel_param "agent.enable_signature_verification"
