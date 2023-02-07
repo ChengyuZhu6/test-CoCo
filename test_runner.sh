@@ -340,7 +340,7 @@ run_signed_image_config() {
 	local str="Test_simple_signed_image"
 	for image in ${IMAGE_LISTS[@]}; do
 		image=$(echo $image | tr A-Z a-z)
-		docker pull $image
+		# docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		cat "$(generate_tests_signed_image "$TEST_COCO_PATH/../templates/signed_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
@@ -366,7 +366,7 @@ run_cosigned_image_config() {
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 	for image in ${IMAGE_LISTS[@]}; do
 		image=$(echo $image | tr A-Z a-z)
-		docker pull $image
+		# docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
 		cat "$(generate_tests_cosign_image "$TEST_COCO_PATH/../templates/cosigned_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
