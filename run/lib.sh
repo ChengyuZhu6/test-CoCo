@@ -684,7 +684,6 @@ generate_tests_offline_encrypted_image() {
 }
 generate_cosign_image() {
     local img=$1
-    # IMAGE=zcy-Z390-AORUS-MASTER.sh.intel.com/nginx:cosigned
     local registrys=$(echo $img | cut -d "/" -f1)
     local img_name=$(echo $img | cut -d "/" -f2)
     docker tag $img $registrys/cosigned/$img_name:cosigned
@@ -704,8 +703,10 @@ generate_tests_cosign_image() {
     local new_config=$(mktemp "$TEST_COCO_PATH/../tmp/$(basename ${base_config}).XXX")
     local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
     local offline_new_config="$TEST_COCO_PATH/../tmp/aa-offline_fs_kbc-resources.json"
-    local p_b="$(cat $TEST_COCO_PATH/../config/policy.json | base64)"
-    local policy_base64=$(echo $p_b | tr -d '\n' | tr -d ' ')
+    local policy_old="$TEST_COCO_PATH/../config/policy.json"
+    local policy_new="$TEST_COCO_PATH/../tmp/policy.json"
+    REGISTRY_NAME="$REGISTRY_NAME" envsubst <"$policy_old" >"$policy_new"
+    local policy_base64="$(cat "$policy_new" | base64 -w 0)"
     local c_k_b="$(cat $TEST_COCO_PATH/../certs/cosign.pub | base64)"
     local cosign_key_base64=$(echo $c_k_b | tr -d '\n' | tr -d ' ')
     POLICY_BASE64="$policy_base64" COSIGN_KEY_BASE64="$cosign_key_base64" envsubst <"$offline_base_config" >"$offline_new_config"
