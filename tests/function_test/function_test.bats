@@ -42,7 +42,6 @@ load ../run/lib.sh
     pod_config="$(new_pod_config $TEST_COCO_PATH/../fixtures/pod-default-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE")"
     unencrypted_unsigned_image_from_unprotected_registry $pod_config
     multiple_pods_delete
-    rm $TEST_COCO_PATH/../fixtures/pod-default-config.yaml.in.*
 }
 @test "Test_eaa_kbc_encrypted_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
     set_runtimeclass_config $RUNTIMECLASSNAME
