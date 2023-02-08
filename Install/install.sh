@@ -10,6 +10,7 @@ proxy=http://child-prc.intel.com:913
 export http_proxy=$proxy 
 export https_proxy=$proxy
 export no_proxy=127.0.0.0/8,localhost,10.0.0.0/8,192.168.0.0/16,192.168.14.0/24,.intel.com,100.64.0.0/10,172.16.0.0/12
+export GOPATH=$HOME/go
 EOF
 source ~/.bash_profile
 
@@ -47,5 +48,8 @@ else
     sudo dnf -y install git curl jq
     sudo dnf -y install ansible-core
 fi
+
+git clone -b v0.3.0 https://github.com/ChengyuZhu6/test-CoCo.git $GOPATH/src/github.com/test-CoCo
+cd $GOPATH/src/github.com/test-CoCo/Install
 ./run-local.sh kata-qemu
 
