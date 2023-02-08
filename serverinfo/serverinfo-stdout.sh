@@ -7,7 +7,7 @@ uname -a | cut -d ' ' -f 3 | sed s/^/Kernel:' '/
 dmidecode -t system | awk -f $SCRIPT_FOLDER/servername.awk
 echo "\n--------BIOS:-------"
 dmidecode -t bios|grep Vendor|sed 's/^[ \t]*//g'
-dmidecode -t bios|awk -f $SCRIPT_FOLDER/bios.awk|sed 's/^[ \t]*//g'
+dmidecode -t bios|awk -f $SCRIPT_FOLDER/bios.awk|sed 's/^[ \t]*//g'|cut -d ':' -f2
 echo "\n--------CPU:-------"
 lscpu | grep 'CPU'|egrep -v 'NUMA|Vulnerability'
 echo "\n------Memory:------"

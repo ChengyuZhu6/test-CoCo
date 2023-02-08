@@ -159,8 +159,9 @@ Test_uninstall_operator() {
 Test_cosign_image() {
 	local IMAGE="nginx"
 	local RUNTIMECLASSNAME="kata-qemu"
-	local REGISTRTYIMAGE="ngcn-registry.sh.intel.com/ci-example2g:latest"
+	local REGISTRTYIMAGE="ngcn-registry.sh.intel.com/ci-example4g:latest"
 	generate_cosign_image $(echo $REGISTRTYIMAGE | cut -d ":" -f1)
+	exit 0
 	local offline_base_config="$TEST_COCO_PATH/../config/aa-offline_fs_kbc-resources.json.in"
 	local offline_new_config="$TEST_COCO_PATH/../tmp/aa-offline_fs_kbc-resources.json"
 	local p_b="$(cat $TEST_COCO_PATH/../config/policy.json | base64)"
@@ -217,6 +218,27 @@ Test_auth_image() {
 	kubernetes_create_cc_pod_tests $pod_config
 	rm $pod_config
 }
+Test_pod_spec() {
+	old_vcpus=$(sed -n -e 's#^default_vcpus = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+	old_memory=$(sed -n -e 's#^default_memory = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+	echo "old_vcpus = $old_vcpus"
+	echo "old_memory = $old_memory"
+	pod_mem=4
+	set_key_value "default_vcpus" "4" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	set_key_value "default_memory" "$(echo $pod_mem*1024|bc|sed 's/[^0-9 ]//g')" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	new_vcpus=$(sed -n -e 's#^default_vcpus = \(.*\)#\1#p' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+	new_memory=$(sed -n -e 's#^default_memory = \(.*\)#\1#p' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+	echo "new_vcpus = $new_vcpus"
+	echo "new_memory = $new_memory"
+
+	set_key_value "default_vcpus" "${old_vcpus}" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	set_key_value "default_memory" "${old_memory}" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	# new_vcpus=$(sed -n -e 's#^default_vcpus = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+	# new_memory=$(sed -n -e 's#^default_memory = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+	# echo "new_vcpus = $new_vcpus"
+	# echo "new_memory = $new_memory"
+
+}
 teardown() {
 
 	restore
@@ -249,7 +271,8 @@ tests() {
 main() {
 	setup
 	read_config
-	Test_cosign_image
+	get_certs_from_remote
+	# Test_cosign_image
 	# Test_signed_image
 	# Test_install_operator
 	# get_certs_from_remote

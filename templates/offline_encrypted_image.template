@@ -9,6 +9,11 @@
 	$TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
 	switch_measured_rootfs_verity_scheme none
 	#remove_kernel_param "agent.enable_signature_verification"
+	set_key_value "default_vcpus" "1" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	set_key_value "default_memory" "2048" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	set_key_value "default_vcpus" "2" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	sizes=$($IMAGE| sed 's/[^0-9 ]//g')
+	set_key_value "default_memory" "16384" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
 	#generate_offline_encrypted_image $IMAGE
 	setup_offline_decryption_files_in_guest
 	pod_config="$(new_pod_config_normal $test_coco_path/../fixtures/offline-encrypted-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE:offline-encrypted")"

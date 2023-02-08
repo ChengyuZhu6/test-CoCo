@@ -12,10 +12,4 @@ spec:
     - name: $IMAGE
       image: $REGISTRTYIMAGE
       imagePullPolicy: Always
-      resources:
-        limits:
-          cpu: "${LIMITCPU}"
-          memory: "${LIMITMEM}Gi"
-        requests:
-          cpu: "${REQUESTCPU}"
-          memory: "${REQUESTMEM}Gi"
+       

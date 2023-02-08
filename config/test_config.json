@@ -22,8 +22,9 @@
 			"2"
 		],
 		"memSize": [
-			"1",
-			"2"
+			"12",
+			"16",
+			"24"
 		]
 	},
 	"file": {
@@ -42,7 +43,8 @@
 		],
 		"imageLists": [
 			"example1G",
-			"example2G"
+			"example2G",
+			"example4G"
 		],
 		"operatorVersion": "0.3.0"
 	},

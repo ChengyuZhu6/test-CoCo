@@ -122,17 +122,20 @@ summary_result_for_pod_spec() {
     mem_nums=$(jq -r '.config.memSize[]' $TEST_COCO_PATH/../config/test_config.json)
     cpu_nums=$(jq -r '.config.cpuNum[]' $TEST_COCO_PATH/../config/test_config.json)
     # echo $sub_line
+    declare -A all_pod_spec
     for ns in ${sub_line[@]}; do
-        mem_size=$(sed -n ${ns}p $file_path | grep ' name=' | awk -F '=' '{print $3}' | cut -d ' ' -f6| cut -d '"' -f1 | sed 's/[^0-9 ]//g' )
+        mem_size=$(sed -n ${ns}p $file_path | grep ' name=' | awk -F '=' '{print $3}' | cut -d ' ' -f6 | cut -d '"' -f1 | sed 's/[^0-9 ]//g')
         cpu_num=$(sed -n ${ns}p $file_path | grep ' name=' | awk -F '=' '{print $3}' | cut -d ' ' -f5 | cut -d '"' -f1 | sed 's/[^0-9 ]//g')
         running_time=$(sed -n ${ns}p $file_path | grep ' time=' | awk -F '=' '{print $4}' | cut -d ' ' -f1 | cut -d '"' -f2)
-        all_pod_spec[$mem_size"+"$cpu_num]=$running_time
+
+        pos="${mem_size}~${cpu_num}"
+        all_pod_spec[$pos]=$running_time
     done
     for mem_size in ${mem_nums[@]}; do
         input_str="$mem_size"
         for cpu_num in ${cpu_nums[@]}; do
-            pos=$mem_size"+"$cpu_num
-            input_str=$input_str",${all_pod_spec[$mem_size"+"$cpu_num]}"
+            pos="${mem_size}~${cpu_num}"
+            input_str=$input_str",${all_pod_spec[$pos]}"
         done
         echo "$input_str" | tee -a $csv_file_for_pod_spec
     done
@@ -212,7 +215,31 @@ generate_xls() {
     python3 $TEST_COCO_PATH/../run/generate_xls.py $1 $2
     # rm $TEST_COCO_PATH/../report/*.xml
 }
+get_serverinfo() {
+    local info_csv="$TEST_COCO_PATH/../report/info.csv"
+    local host_os_info="HostOS,$(cat /etc/issue | sed -n '1p')"
+    echo "$host_os_info" | tee -a $info_csv
+    local host_kernel_info="HostKernel,$(uname -a | cut -d ' ' -f 3 | sed s/^/Kernel:' '/ | cut -d ':' -f2 | sed 's/^[ \t]*//g')"
+    echo "$host_kernel_info" | tee -a $info_csv
+    local host_bios_info="HostBios,$(dmidecode -t bios | awk -f $TEST_COCO_PATH/../serverinfo/bios.awk | sed 's/^[ \t]*//g' | cut -d ':' -f2 | sed 's/^[ \t]*//g')"
+    echo "$host_bios_info" | tee -a $info_csv
+    local host_cpu="HostCPU,$(lscpu | grep 'CPU' | egrep -v 'NUMA|Vulnerability' | grep Model | cut -d ':' -f2 | sed 's/^[ \t]*//g')"
+    echo "$host_cpu" | tee -a $info_csv
+    local mem_size_kb=$(cat /proc/meminfo | grep MemTotal | cut -d ':' -f2 | sed 's/^[ \t]*//g' | cut -d ' ' -f1)
+    local mem_size_gb=$(echo "scale=2; $mem_size_kb/1024" | bc)
+    local host_mem="HostMemory, ${mem_size_gb}GB"
+    echo "$host_mem" | tee -a $info_csv
+    local kernel_version="$(/opt/confidential-containers/bin/kata-runtime kata-env --json | jq -r .Kernel.Path | cut -d '/' -f6)"
+    local guest_kernel="GuestKernel, ${kernel_version}"
+    echo "$guest_kernel" | tee -a $info_csv
+    local runtime_version=$(/opt/confidential-containers/bin/kata-runtime kata-env --json | jq -r .Runtime.Version | grep Semver | cut -d'"' -f4)
+    local guest_runtime="GuestRuntime, ${runtime_version}"
+    echo "$guest_runtime" | tee -a $info_csv
+    local hypervisor_version=$(/opt/confidential-containers/bin/kata-runtime kata-env --json | jq -r .Hypervisor.Version | sed -n "1,1p")
+    local guest_hypervisor="GuestHypervisor, ${hypervisor_version}"
+    echo "$guest_hypervisor" | tee -a $info_csv
 
+}
 main() {
     file_base_dir="$TEST_COCO_PATH/../report"
     sub_dir="$1"
@@ -259,5 +286,5 @@ main() {
         ;;
     esac
 }
-
+# get_serverinfo
 main "$@"

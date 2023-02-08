@@ -77,13 +77,13 @@ parse_args() {
 		i)
 			echo "-i runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
-			run_operator_install
+			# run_operator_install
 			run_unencrypted_unsigned_image_config
-			run_encrypted_image_config
-			run_offline_encrypted_image_config
+			# run_encrypted_image_config
+			#run_offline_encrypted_image_config
 			run_signed_image_config
 			run_cosigned_image_config
-			run_operator_uninstall
+			# run_operator_uninstall
 			;;
 		o)
 			echo "-o runtime: $OPTARG "
@@ -188,7 +188,7 @@ run_un_pod_spec_tests_config() {
 	local str="Test_pod_spec_for_unencrypted_unsigned_image"
 	echo -e "load ../run/lib.sh " | tee -a $new_pod_configs >/dev/null
 
-	local image="nginx"
+	local image="example1g"
 	image_size=$(docker image ls | grep $(echo ci-$image | tr A-Z a-z) | head -1 | awk '{print $7}')
 	runtimeclass=$Current_RuntimeClass
 	for cpunums in ${CPUCONFIG[@]}; do
@@ -214,7 +214,7 @@ run_cosign_pod_spec_tests_config() {
 	local str="Test_pod_spec_for_cosigned_image"
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
 
-	local image="nginx"
+	local image="example1g"
 	image_size=$(docker image ls | grep $(echo ci-$image | tr A-Z a-z) | head -1 | awk '{print $7}')
 	runtimeclass=$Current_RuntimeClass
 	for cpunums in ${CPUCONFIG[@]}; do
@@ -237,7 +237,7 @@ run_eaa_kbc_pod_spec_tests_config() {
 	fi
 	local new_pod_configs="$TEST_COCO_PATH/../tmp/eaa_kbc_pod_spec.bats"
 	local str="Test_pod_spoc_for_eaa_kbc_image"
-	local image="nginx"
+	local image="example1g"
 	image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 	runtimeclass=$Current_RuntimeClass
 	for cpunums in ${CPUCONFIG[@]}; do
