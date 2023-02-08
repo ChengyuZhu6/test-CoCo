@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-source $(pwd)/run/common.bash
+source $(pwd)/function_test/run/common.bash
 parse_yaml() {
     local prefix=$2
     local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @ | tr @ '\034')

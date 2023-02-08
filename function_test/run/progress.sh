@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source $(pwd)/run/common.bash
+source $(pwd)/function_test/run/common.bash
 file_base_dir="$TEST_COCO_PATH/../report"
 sub_dir=""
 image_type="un"

@@ -1,5 +1,5 @@
-source $(pwd)/run/common.bash
-source $(pwd)/run/lib.sh
+source $(pwd)/function_test/run/common.bash
+source $(pwd)/function_test/run/lib.sh
 
 read_config
 echo "start generate images"

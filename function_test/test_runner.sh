@@ -3,7 +3,8 @@
 # set -o errexit
 # set -o nounset
 # set -o pipefail
-SCRIPT_PATH=$(pwd)
+SUB_DIR="function_test"
+SCRIPT_PATH=$(pwd)/$SUB_DIR
 script_name=$(basename "$0")
 tests_passing=""
 tests_config=""
@@ -36,7 +37,6 @@ EOF
 }
 parse_args() {
 	read_config
-
 	while getopts "u:e:s:t:a:b:m:i:o:p:f:c:h:d: " opt; do
 		case $opt in
 		u)
@@ -652,10 +652,6 @@ setup_env() {
 
 main() {
 	read_config
-	# clean_up
-	# cleanup_network_interface
-	# gen_clean_arch
-	# exit 0
 	$SCRIPT_PATH/serverinfo/serverinfo-stdout.sh
 	echo -e "\n\n"
 
