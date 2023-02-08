@@ -77,13 +77,13 @@ parse_args() {
 		i)
 			echo "-i runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
-			# run_operator_install
+			run_operator_install
 			run_unencrypted_unsigned_image_config
-			# run_encrypted_image_config
-			#run_offline_encrypted_image_config
+			run_encrypted_image_config
+			run_offline_encrypted_image_config
 			run_signed_image_config
 			run_cosigned_image_config
-			# run_operator_uninstall
+			run_operator_uninstall
 			;;
 		o)
 			echo "-o runtime: $OPTARG "
