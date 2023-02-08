@@ -1,0 +1,29 @@
+
+@test "Test_pod_spec_for_unencrypted_unsigned_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_CPU_NUM}CPUs ${POD_MEM_SIZE}GB" {
+		set_runtimeclass_config $RUNTIMECLASSNAME
+		switch_measured_rootfs_verity_scheme none
+		add_kernel_params "agent.https_proxy=http://child-prc.intel.com:913"
+		add_kernel_params "agent.no_proxy=*.sh.intel.com,10.*"
+		pod_config="$(new_pod_config $TEST_COCO_PATH/../tests/pod_spec/fixtures/pod_spec.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE" "1")"
+		old_vcpus=$(sed -n -e 's#^default_vcpus = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+		old_memory=$(sed -n -e 's#^default_memory = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+		echo "old_vcpus = $old_vcpus"
+		echo "old_memory = $old_memory"
+		
+		set_key_value "default_vcpus" "${POD_CPU_NUM}" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+		set_key_value "default_memory" "$(echo $POD_MEM_SIZE*1024|bc|sed 's/[^0-9 ]//g')" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+		new_vcpus=$(sed -n -e 's#^default_vcpus = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+		new_memory=$(sed -n -e 's#^default_memory = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+		echo "new_vcpus = $new_vcpus"
+		echo "new_memory = $new_memory"
+
+		
+		unencrypted_unsigned_image_from_unprotected_registry $pod_config
+		multiple_pods_delete
+		set_key_value "default_vcpus" "${old_vcpus}" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+		set_key_value "default_memory" "${old_memory}" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+		new_vcpus=$(sed -n -e 's#^default_vcpus = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+		new_memory=$(sed -n -e 's#^default_memory = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+		echo "new_vcpus = $new_vcpus"
+		echo "new_memory = $new_memory"
+}

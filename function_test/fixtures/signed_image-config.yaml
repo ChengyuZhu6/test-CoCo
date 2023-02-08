@@ -1,0 +1,14 @@
+# Copyright (c) 2021, 2022 IBM Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+apiVersion: v1
+kind: Pod
+metadata:
+  name: signed-cc
+spec:
+  runtimeClassName: kata-qemu
+  containers:
+  - name: ci-ubuntu
+    image: ngcn-registry.sh.intel.com/ci-ubuntu:signed
+    imagePullPolicy: Always

@@ -1,0 +1,32 @@
+@test "Test_simple_signed_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
+	set_runtimeclass_config $RUNTIMECLASSNAME
+	switch_measured_rootfs_verity_scheme none
+	remove_kernel_param "agent.enable_signature_verification"
+	remove_kernel_param "agent.aa_kbc_params"
+	#gpg --import ${test_coco_path}/../signed/pubkey.gpg
+	if [ -f ${test_coco_path}/../signed/pubkey.gpg ]; then
+		rm ${test_coco_path}/../signed/pubkey.gpg
+	fi
+	set_key_value "default_vcpus" "1" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	set_key_value "default_memory" "2048" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	set_key_value "default_vcpus" "2" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	sizes=$($IMAGE| sed 's/[^0-9 ]//g')
+	set_key_value "default_memory" "16384" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	gpg --no-tty --batch -a -o ${test_coco_path}/../signed/pubkey.gpg --export $GPG_EMAIL
+	skopeo --insecure-policy copy --sign-passphrase-file ${test_coco_path}/../signed/passwd.txt --sign-by $GPG_EMAIL docker://$REGISTRTYIMAGE:latest  docker://$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed
+	setup_skopeo_signature_files_in_guest $IMAGE
+	rtcs=$RUNTIMECLASSNAME
+	if [ "${rtcs##*-}" == "tdx" ]; then 
+		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$(hostname -I | awk '{print $1}'):50000"
+	else
+		setup_offline_signed_files_in_guest
+	fi
+	pod_config="$(new_pod_config_normal ${test_coco_path}/../fixtures/signed_image-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed")"
+
+	kubernetes_create_cc_pod_tests $pod_config
+	kubectl get pods
+	pod_id=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
+	kubernetes_delete_cc_pod $pod_id 
+	rm $pod_config
+	rm ${test_coco_path}/../signed/pubkey.gpg
+}

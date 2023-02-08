@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name:  measured-boot-cc
+spec:
+  runtimeClassName: $RUNTIMECLASSNAME
+  containers:
+  - name: $IMAGE
+    image: $REGISTRTYIMAGE
+    imagePullPolicy: Always

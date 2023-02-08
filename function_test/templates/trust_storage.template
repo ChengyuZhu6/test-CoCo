@@ -1,0 +1,56 @@
+
+@test "Test_trust_storage $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME " {
+	set_runtimeclass_config $RUNTIMECLASSNAME
+	skip
+	pod_config="$(new_pod_config_normal $test_coco_path/../fixtures/sts-lvm.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE")"
+
+	create_test_pod $pod_config
+	POD_NAME=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
+	if ! kubernetes_wait_cc_pod_be_ready "${POD_NAME}"; then
+		kubectl delete -f $pod_config
+		kubectl delete pvc "html-${POD_NAME}"
+		rm $pod_config
+		helm delete open-local
+		rm -r $go_path/open-local
+		return 1
+	fi
+	checkout_snapshot_yaml $test_coco_path/../fixtures/snapshot.yaml $IMAGE
+	kubectl apply -f $test_coco_path/../fixtures/snapshot.yaml
+
+	if ! kubernetes_wait_cc_snapshot_be_ready; then
+		kubectl delete -f $test_coco_path/../fixtures/snapshot.yaml
+		kubectl delete -f $pod_config
+		kubectl delete pvc "html-$POD_NAME"
+		rm $pod_config
+		helm delete open-local
+		rm -r $go_path/open-local
+		return 1
+	fi
+	pod_config_snap="$(new_pod_config_normal $test_coco_path/../fixtures/sts-lvm-snap.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE")"
+
+	kubectl apply -f $pod_config_snap
+	eval $(parse_yaml $pod_config_snap "snap_")
+	SNAP_POD_NAME=$snap_metadata_name
+
+	if ! kubernetes_wait_cc_pod_be_ready "${SNAP_POD_NAME}-0"; then
+		#kubernetes_delete_cc_pod_if_exists "${SNAP_POD_NAME}-0" || true
+		kubectl delete -f $pod_config_snap
+		kubectl delete pvc "html-${SNAP_POD_NAME}-0"
+		rm $pod_config
+		kubectl delete -f $test_coco_path/../fixtures/snapshot.yaml
+		kubectl delete -f $pod_config
+		kubectl delete pvc "html-${POD_NAME}"
+		rm $pod_config_snap
+		helm delete open-local
+		rm -r $go_path/open-local
+		return 1
+	fi
+	#kubernetes_delete_cc_pod_if_exists "${SNAP_POD_NAME}-0" || true
+	kubectl delete -f $pod_config_snap
+	kubectl delete pvc "html-${SNAP_POD_NAME}-0"
+	rm $pod_config_snap	
+	kubectl delete -f $test_coco_path/../fixtures/snapshot.yaml
+	kubectl delete -f $pod_config
+	kubectl delete pvc "html-${POD_NAME}"
+	rm $pod_config
+}

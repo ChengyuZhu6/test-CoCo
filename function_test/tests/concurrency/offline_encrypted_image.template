@@ -1,0 +1,21 @@
+@test "Test_concurrency_offline_encrypted_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_NUM}PODs" {
+	set_runtimeclass_config $RUNTIMECLASSNAME
+	#clear_kernel_params
+	remove_kernel_param "agent.aa_kbc_params"
+	if [ "${RUNTIMECLASSNAME##*-}" == "tdx" ]; then
+		skip
+	fi
+	switch_image_service_offload on
+	$TEST_COCO_PATH/../run/losetup-crt.sh $ROOTFS_IMAGE_PATH c
+	switch_measured_rootfs_verity_scheme none
+	#remove_kernel_param "agent.enable_signature_verification"
+	#generate_offline_encrypted_image $IMAGE
+	setup_offline_decryption_files_in_guest
+
+	for COUNTS in {1..$POD_NUM}
+	do
+		pod_config="$(new_pod_config_concurrency $TEST_COCO_PATH/../tests/concurrency/fixtures/concurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE:offline-encrypted" "$COUNTS")"
+		unencrypted_unsigned_image_from_unprotected_registry $pod_config
+	done
+	multiple_pods_delete
+}

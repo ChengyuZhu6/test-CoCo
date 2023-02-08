@@ -1,0 +1,28 @@
+
+@test "Test_unencrypted_unsigned_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
+		set_runtimeclass_config $RUNTIMECLASSNAME
+		switch_measured_rootfs_verity_scheme none
+		add_kernel_params "agent.https_proxy=http://child-prc.intel.com:913"
+		add_kernel_params "agent.no_proxy=*.sh.intel.com,10.*"
+		remove_kernel_param "agent.aa_kbc_params"
+		if [ "${rtcs##*-}" == "tdx" ]; then 
+		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$IPAddress:50000"
+		else
+			add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
+		fi
+		set_key_value "default_vcpus" "1" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+		set_key_value "default_memory" "2048" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+		set_key_value "default_vcpus" "2" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+		sizes=$(echo $IMAGE|sed 's/[^0-9 ]//g')
+		set_key_value "default_memory" "16384" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+		
+		new_vcpus=$(sed -n -e 's#^default_vcpus = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+		new_memory=$(sed -n -e 's#^default_memory = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+		for COUNTS in {1..$POD_NUM}
+		do
+			pod_config="$(new_pod_config $TEST_COCO_PATH/../fixtures/unsigned-uncrypted-images-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$REGISTRTYIMAGE")"
+			unencrypted_unsigned_image_from_unprotected_registry $pod_config
+		done
+		multiple_pods_delete
+		
+}

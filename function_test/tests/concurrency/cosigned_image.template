@@ -1,0 +1,22 @@
+@test "Test_cocurrency_cosigned_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_NUM}PODs" {
+	set_runtimeclass_config $RUNTIMECLASSNAME
+	switch_measured_rootfs_verity_scheme none
+	#generate_cosign_image $(echo $REGISTRTYIMAGE | cut -d ":" -f1)
+	
+	
+	remove_kernel_param "agent.enable_signature_verification"
+	remove_kernel_param "agent.aa_kbc_params"
+	rtcs=$RUNTIMECLASSNAME
+	if [ "${rtcs##*-}" == "tdx" ]; then 
+		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$IPAddress:50000"
+	else
+		add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
+		cp_to_guest_img "etc" "${test_coco_path}/../tmp/aa-offline_fs_kbc-resources.json"
+	fi
+	for COUNTS in {1..$POD_NUM}
+	do
+		pod_config="$(new_pod_config_concurrency ${test_coco_path}/../fixtures/cosign-config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/cosigned/$IMAGE:cosigned" "$COUNTS")"
+		unencrypted_unsigned_image_from_unprotected_registry $pod_config
+	done
+	multiple_pods_delete
+}

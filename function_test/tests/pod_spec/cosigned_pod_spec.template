@@ -1,0 +1,29 @@
+@test "Test_pod_spec_for_cosigned_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_CPU_NUM}CPUs ${POD_MEM_SIZE}GB" {
+	set_runtimeclass_config $RUNTIMECLASSNAME
+	switch_measured_rootfs_verity_scheme none
+	#generate_cosign_image $(echo $REGISTRTYIMAGE | cut -d ":" -f1)
+	set_key_value "default_vcpus" "1" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	set_key_value "default_memory" "2048" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	pod_config="$(new_pod_config ${test_coco_path}/../tests/pod_spec/fixtures/pod_spec.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/cosigned/$IMAGE:cosigned" "1")"
+	remove_kernel_param "agent.enable_signature_verification"
+	remove_kernel_param "agent.aa_kbc_params"
+	rtcs=$RUNTIMECLASSNAME
+
+	set_key_value "default_vcpus" "${POD_CPU_NUM}" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	set_key_value "default_memory" "$(echo $POD_MEM_SIZE*1024|bc|sed 's/[^0-9 ]//g')" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	new_vcpus=$(sed -n -e 's#^default_vcpus = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+	new_memory=$(sed -n -e 's#^default_memory = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
+
+
+	if [ "${rtcs##*-}" == "tdx" ]; then 
+		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$IPAddress:50000"
+	else
+		add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
+		cp_to_guest_img "etc" "${test_coco_path}/../tmp/aa-offline_fs_kbc-resources.json"
+	fi
+
+	kubernetes_create_cc_pod_tests $pod_config
+	pod_name=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
+	kubernetes_delete_cc_pod "$pod_name"
+	rm $pod_config
+}

@@ -1,0 +1,15 @@
+
+@test "Test_measured_boot $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
+		#skip
+		set_runtimeclass_config $RUNTIMECLASSNAME
+		switch_measured_rootfs_verity_scheme dm-verity
+		add_kernel_params "agent.https_proxy=$HTTPS_PROXY"
+		add_kernel_params "agent.no_proxy=$NO_PROXY"
+		pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/measured-boot-config.yaml.in "busybox" "$RUNTIMECLASSNAME" "quay.io/prometheus/busybox:latest" )"
+		kubernetes_create_cc_pod_tests $pod_config
+		pod_name=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
+		kubernetes_delete_cc_pod "${pod_name}"
+		rm $pod_config
+		switch_measured_rootfs_verity_scheme none
+}
+

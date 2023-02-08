@@ -1,0 +1,55 @@
+{
+	"config": {
+		"podConfigPath": "fixtures",
+		"runtimeClass": [
+			"kata-qemu",
+			"kata-clh"
+		],
+		"TDXRuntimeClass": [
+			"kata-clh-tdx",
+			"kata-qemu-tdx"
+		],
+		"eaaTDXRuntimeClass": [
+			"kata-qemu-tdx-eaa-kbc",
+			"kata-clh-tdx-eaa-kbc"
+		],
+		"podNum": [
+			"1",
+			"2"
+		],
+		"cpuNum": [
+			"1",
+			"2"
+		],
+		"memSize": [
+			"12",
+			"16",
+			"24"
+		]
+	},
+	"file": {
+		"commentsImageLists": [
+			"ubuntu",
+			"nginx"
+		],
+		"notCommentsImageLists": [
+			"example256M",
+			"example512M",
+			"example1G",
+			"example2G",
+			"example4G",
+			"example8G",
+			"example16G"
+		],
+		"imageLists": [
+			"example1G",
+			"example2G",
+			"example4G"
+		],
+		"operatorVersion": "0.3.0"
+	},
+	"certificates": {
+		"type": "DNS",
+		"imagePath": "./create_files"
+	}
+}

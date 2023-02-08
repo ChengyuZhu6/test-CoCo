@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name:  measured-boot-cc
+spec:
+  runtimeClassName: kata-qemu
+  containers:
+  - name: ubuntu
+    image: quay.io/prometheus/busybox:latest
+    imagePullPolicy: Always

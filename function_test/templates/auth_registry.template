@@ -1,0 +1,14 @@
+
+@test "Test_auth_registry $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME" {
+		set_runtimeclass_config $RUNTIMECLASSNAME
+		if [ $(echo ${RUNTIMECLASSNAME} | grep tdx | wc -l) -le 0 ]; then
+        	skip
+    	fi
+		remove_kernel_param "agent.aa_kbc_params"
+		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$(hostname -I | awk '{print $1}'):50000"
+		pod_config="$(new_pod_config_normal $TEST_COCO_PATH/../fixtures/auth_registry-config.yaml.in "confidential-containers-auth" "$RUNTIMECLASSNAME" "quay.io/kata-containers/confidential-containers-auth:test" )"
+		kubernetes_create_cc_pod_tests $pod_config
+		pod_name=$(kubectl get pods -o jsonpath='{.items..metadata.name}')
+		kubernetes_delete_cc_pod "$pod_name"
+		rm $pod_config
+}

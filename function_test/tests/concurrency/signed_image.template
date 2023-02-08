@@ -1,0 +1,26 @@
+@test "Test_concurrency_simple_signed_image $IMAGE $IMAGE_SIZE $RUNTIMECLASSNAME ${POD_NUM}PODs" {
+	set_runtimeclass_config $RUNTIMECLASSNAME
+	switch_measured_rootfs_verity_scheme none
+	remove_kernel_param "agent.enable_signature_verification"
+	remove_kernel_param "agent.aa_kbc_params"
+	#gpg --import ${test_coco_path}/../signed/pubkey.gpg
+	if [ -f ${test_coco_path}/../signed/pubkey.gpg ]; then
+		rm ${test_coco_path}/../signed/pubkey.gpg
+	fi
+	gpg --no-tty --batch -a -o ${test_coco_path}/../signed/pubkey.gpg --export $GPG_EMAIL
+	skopeo --insecure-policy copy --sign-passphrase-file ${test_coco_path}/../signed/passwd.txt --sign-by $GPG_EMAIL docker://$REGISTRTYIMAGE:latest  docker://$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed
+	setup_skopeo_signature_files_in_guest $IMAGE
+	rtcs=$RUNTIMECLASSNAME
+	if [ "${rtcs##*-}" == "tdx" ]; then 
+		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$(hostname -I | awk '{print $1}'):50000"
+	else
+		setup_offline_signed_files_in_guest
+	fi
+	for COUNTS in {1..$POD_NUM}
+	do
+		pod_config="$(new_pod_config_concurrency ${test_coco_path}/../tests/concurrency/fixtures/concurrency_pod_config.yaml.in "$IMAGE" "$RUNTIMECLASSNAME" "$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed" "$COUNTS")"
+		unencrypted_unsigned_image_from_unprotected_registry $pod_config
+	done
+	multiple_pods_delete
+	rm ${test_coco_path}/../signed/pubkey.gpg
+}

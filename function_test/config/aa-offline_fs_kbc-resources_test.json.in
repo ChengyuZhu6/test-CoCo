@@ -1,0 +1,7 @@
+{
+  "Policy": "$POLICY_BASE64",
+  "Sigstore Config": "$SIGSTORE",
+  "GPG Keyring": "$GPGKEY",
+  "Cosign Key": "$COSIGN_KEY_BASE64",
+  "Credential": "${CREDENTIAL}"
+}
