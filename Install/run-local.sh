@@ -98,13 +98,6 @@ main() {
 	step_install_operator=1
 	sudo -E PATH="$PATH" bash -c './operator.sh'
 
-	echo "INFO: Run tests"
-	cmd="sudo -E PATH=\"$PATH\" bash -c "
-	if [ -z "$runtimeclass" ]; then
-		cmd+="'./tests_runner.sh'"
-	else
-		cmd+="'./tests_runner.sh -r $runtimeclass'"
-	fi
 	eval $cmd
 	popd >/dev/null
 }

@@ -11,41 +11,15 @@ set -o pipefail
 
 script_dir="$(dirname "$(readlink -f "$0")")"
 project_dir="$(readlink -f ${script_dir}/../..)"
-
+OPERATOR_VERSION=v0.3.0
 source "${script_dir}/lib.sh"
 
 # The operator namespace.
 readonly op_ns="confidential-containers-system"
-# There should be a registry running locally on port 5000.
-export IMG=localhost:5000/cc-operator
-
-# Build the operator and push images to a local registry.
-#
-build_operator () {
-	start_local_registry
-
-        # Note: git config --global --add safe.directory will always
-        # append the target to .gitconfig without checking the
-        # existence of the target,
-        # so it's better to check it before adding the target repo.
-        local sd="$(git config --global --get safe.directory ${project_dir} || true)"
-        if [ "${sd}" == "" ]; then
-                echo "Add repo ${project_dir} to git's safe.directory"
-                git config --global --add safe.directory "${project_dir}"
-        else
-                echo "Repo ${project_dir} already in git's safe.directory"
-        fi
-
-	pushd "$project_dir" >/dev/null
-	make docker-build
-	make docker-push
-	popd >/dev/null
-}
 
 # Install the operator.
 #
 install_operator() {
-	start_local_registry
 
 	# The node should be 'worker' labeled
 	local label="node-role.kubernetes.io/worker"
@@ -54,11 +28,7 @@ install_operator() {
 		kubectl label node "$(hostname)" "$label="
 	fi
 
-	pushd "$project_dir" >/dev/null
-	# We should use a locally built image for operator.
-	sed -i "s~\(.*newName: \).*~\1${IMG}~g" config/manager/kustomization.yaml
-	kubectl apply -k config/default
-	popd >/dev/null
+	kubectl apply -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
 
 	# Wait the operator controller to be running.
 	local controller_pod="cc-operator-controller-manager"
@@ -79,9 +49,8 @@ install_operator() {
 #
 install_ccruntime() {
 	local runtimeclass="${RUNTIMECLASS:-kata-qemu}"
-	pushd "$project_dir" >/dev/null
-	kubectl create -k config/samples/ccruntime/${ccruntime_overlay}
-	popd >/dev/null
+	
+	kubectl create -k github.com/confidential-containers/operator/config/samples/ccruntime/default?ref=v${OPERATOR_VERSION}
 
 	local pod=""
 	local cmd=""
@@ -106,36 +75,13 @@ install_ccruntime() {
 		echo "ERROR: runtimeclass ${runtimeclass} is not up"
 		return 1
 	fi
-	# To keep operator running, we should resume registry stopped during containerd restart.
-	start_local_registry
-}
-
-# Start a local registry where images can be stored.
-# The ansible playbooks should start it however it can get stopped when,
-# for example, the operator is unistalled.
-#
-start_local_registry() {
-	# TODO: allow callers to override the container name, port..etc
-	local registry_container="local-registry"
-
-	if ! curl -s localhost:5000; then
-		docker start local-registry >/dev/null
-		local cnt=0
-		while ! curl -s localhost:5000 -o $cnt -lt 5; do
-			sleep 1
-			cnt=$(($cnt+1))
-		done
-		[ $cnt -ne 5 ]
-	fi
 }
 
 # Uninstall the operator and ccruntime.
 #
 uninstall_operator() {
-	pushd "$project_dir" >/dev/null
-	kubectl delete -k config/samples/ccruntime/${ccruntime_overlay}
-	kubectl delete -k config/default
-	popd >/dev/null
+	kubectl delete -k github.com/confidential-containers/operator/config/samples/ccruntime/default?ref=v${OPERATOR_VERSION}
+	kubectl delete -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
 }
 
 usage() {
@@ -163,7 +109,6 @@ main() {
 	else
 		case $1 in
 			-h|--help) usage && exit 0;;
-			build) build_operator;;
 			install)
 				install_operator
 				install_ccruntime
