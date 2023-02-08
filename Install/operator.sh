@@ -103,7 +103,6 @@ main() {
 		ccruntime_overlay="s390x"
 	fi
 	if [ $# -eq 0 ]; then
-		build_operator
 		install_operator
 		install_ccruntime
 	else

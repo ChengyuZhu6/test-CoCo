@@ -21,7 +21,8 @@ if [[ "$OPERATING_SYSTEM_VERSION"=="Ubuntu" ]]; then
     70
 ESXU
     apt-get install -y systemd sudo 
-    apt-get install -y build-essential software-properties-common net-tools git curl jq expect wget tar
+    apt-get install -y build-essential software-properties-common net-tools git curl jq expect wget tar iproute2 locales open-iscsi
+    apt-get install --reinstall linux-image-$(uname -r)
     if [ ! $(command -v ansible-playbook >/dev/null) ]; then
         /usr/bin/expect <<-EOF
         spawn apt-add-repository ppa:ansible/ansible

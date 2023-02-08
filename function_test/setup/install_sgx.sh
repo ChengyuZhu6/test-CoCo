@@ -9,7 +9,7 @@ which ar as ld objcopy objdump ranlib
 # make sdk
 make sdk_install_pkg
 
-
+apt-get install -y ethtool kmod
 
 chmod +x ./linux/installer/bin/sgx_linux_x64_sdk_2.18.101.1.bin
 ./linux/installer/bin/sgx_linux_x64_sdk_2.18.101.1.bin
