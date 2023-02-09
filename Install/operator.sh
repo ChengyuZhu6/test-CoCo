@@ -23,9 +23,9 @@ install_operator() {
 
 	# The node should be 'worker' labeled
 	local label="node-role.kubernetes.io/worker"
-	if ! kubectl get node "$(hostname)" -o jsonpath='{.metadata.labels}' \
+	if ! kubectl get node "$(hostname| tr A-Z a-z)" -o jsonpath='{.metadata.labels}' \
 		| grep -q "$label"; then
-		kubectl label node "$(hostname)" "$label="
+		kubectl label node "$(hostname| tr A-Z a-z)" "$label="
 	fi
 
 	kubectl apply -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
