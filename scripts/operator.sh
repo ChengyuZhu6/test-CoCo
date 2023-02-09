@@ -12,7 +12,8 @@ set -o pipefail
 script_dir="$(dirname "$(readlink -f "$0")")"
 project_dir="$(readlink -f ${script_dir}/../..)"
 OPERATOR_VERSION=0.3.0
-source "${script_dir}/lib.sh"
+OPERATOR_INSTALL_PATH="$GOPATH/src/github.com/operator/tests/e2e"
+source "${OPERATOR_INSTALL_PATH}/lib.sh"
 
 # The operator namespace.
 readonly op_ns="confidential-containers-system"
@@ -23,9 +24,9 @@ install_operator() {
 
 	# The node should be 'worker' labeled
 	local label="node-role.kubernetes.io/worker"
-	if ! kubectl get node "$(hostname| tr A-Z a-z)" -o jsonpath='{.metadata.labels}' \
-		| grep -q "$label"; then
-		kubectl label node "$(hostname| tr A-Z a-z)" "$label="
+	if ! kubectl get node "$(hostname | tr A-Z a-z)" -o jsonpath='{.metadata.labels}' |
+		grep -q "$label"; then
+		kubectl label node "$(hostname | tr A-Z a-z)" "$label="
 	fi
 
 	kubectl apply -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
@@ -49,7 +50,7 @@ install_operator() {
 #
 install_ccruntime() {
 	local runtimeclass="${RUNTIMECLASS:-kata-qemu}"
-	
+
 	kubectl create -k github.com/confidential-containers/operator/config/samples/ccruntime/default?ref=v${OPERATOR_VERSION}
 
 	local pod=""
@@ -80,42 +81,74 @@ install_ccruntime() {
 # Uninstall the operator and ccruntime.
 #
 uninstall_operator() {
+	export KUBECONFIG=/etc/kubernetes/admin.conf
+
 	kubectl delete -k github.com/confidential-containers/operator/config/samples/ccruntime/default?ref=v${OPERATOR_VERSION}
 	kubectl delete -k github.com/confidential-containers/operator/config/release?ref=v${OPERATOR_VERSION}
+	clean_env
 }
 
 usage() {
 	cat <<-EOF
-	Utility to build/install/uninstall the operator.
+		Utility to install/uninstall the operator.
 
-	Use: $0 [-h|--help] [command], where:
-	-h | --help : show this usage
-	command : optional command (build and install by default). Can be:
-	 "build": build only,
-	 "install": install only,
-	 "uninstall": uninstall the operator.
+		Use: $0 [-h|--help] [command], where:
+		-h | --help : show this usage
+		command : optional command (install by default). Can be:
+		 "install": install only,
+		 "uninstall": uninstall the operator.
 	EOF
 }
+set_env() {
+	if ! command -v ansible-playbook >/dev/null; then
+		echo "ERROR: ansible-playbook is required to run this script."
+		exit 1
+	fi
 
+	export "PATH=$PATH:/usr/local/bin"
+
+	pushd "$script_dir" >/dev/null
+	echo "INFO: Bootstrap the local machine"
+	step_bootstrap_env=1
+	# ansible-playbook -i localhost, -c local --tags untagged $OPERATOR_INSTALL_PATH/ansible/main.yml
+
+	echo "INFO: Bring up the test cluster"
+	step_start_cluster=1
+	sudo -E PATH="$PATH" bash -c "./init_k8s.sh"
+	export KUBECONFIG=/etc/kubernetes/admin.conf
+
+}
+clean_env() {
+	sudo -E PATH="$PATH" bash -c "$OPERATOR_INSTALL_PATH/cluster/down.sh"
+}
 main() {
 	ccruntime_overlay="default"
 	if [ "$(uname -m)" = "s390x" ]; then
 		ccruntime_overlay="s390x"
 	fi
+
 	if [ $# -eq 0 ]; then
+		echo "INFO: Install the operator"
+		set_env
 		install_operator
 		install_ccruntime
 	else
 		case $1 in
-			-h|--help) usage && exit 0;;
-			install)
-				install_operator
-				install_ccruntime
-				;;
-			uninstall) uninstall_operator;;
-			*)
-				echo "Unknown command '$1'"
-				usage && exit 1
+		-h | --help) usage && exit 0 ;;
+		install)
+			echo "INFO: Install the operator"
+			set_env
+			install_operator
+			install_ccruntime
+			;;
+		uninstall)
+			echo "INFO: Uninstall the operator"
+			uninstall_operator
+			;;
+		*)
+			echo "Unknown command '$1'"
+			usage && exit 1
+			;;
 		esac
 	fi
 }
