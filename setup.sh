@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 OPERATING_SYSTEM_VERSION="Ubuntu"
+OPERATOR_PATH="https://github.com/confidential-containers/operator.git"
+
 configure_locally() {
     ## Check OS type
     OPERATING_SYSTEM_VERSION=$(cat /etc/os-release | grep "NAME" | sed -n "1,1p" | cut -d '=' -f2 | cut -d ' ' -f1 | sed 's/\"//g')
@@ -53,6 +55,11 @@ EOF
     source ~/.bash_profile
     go version
 }
+clone_operator() {
+    if [ ! -d $GOPATH/src/github.com/operator ]; then
+        git clone $OPERATOR_PATH $GOPATH/src/github.com/operator
+    fi
+}
 # Bootstrap the local machine
 bootstrap_local() {
     configure_locally
@@ -76,7 +83,7 @@ Environment="NO_PROXY=127.0.0.0/8,localhost,10.0.0.0/8,192.168.0.0/16,192.168.14
 EOF
     done
     systemctl daemon-reload
-
+    clone_operator
     sudo -E PATH="$PATH" bash -c './scripts/operator.sh install'
 }
 
