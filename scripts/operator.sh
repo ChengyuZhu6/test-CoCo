@@ -110,7 +110,7 @@ set_env() {
 	pushd "$script_dir" >/dev/null
 	echo "INFO: Bootstrap the local machine"
 	step_bootstrap_env=1
-	# ansible-playbook -i localhost, -c local --tags untagged $OPERATOR_INSTALL_PATH/ansible/main.yml
+	ansible-playbook -i localhost, -c local --tags untagged $OPERATOR_INSTALL_PATH/ansible/main.yml
 
 	echo "INFO: Bring up the test cluster"
 	step_start_cluster=1
