@@ -13,7 +13,7 @@ usage() {
             test_type:
             "i" image
             "p" pod_spec
-            "f" functions
+            "f" functional
             "c" concurrency
 	EOF
 }
@@ -35,7 +35,15 @@ parse_args() {
             ;;
         -f | function)
             echo "function $2 $3"
-            ./function_test/test_runner.sh -f kata-qemu
+            sub_opt=""
+            case $2 in
+            image) sub_opt="i" ;;
+            pod_spec) sub_opt="p" ;;
+            functional) sub_opt="f" ;;
+            concurrency) sub_opt="c" ;;
+            esac
+            echo $sub_opt
+            ./function_test/test_runner.sh -$2 $3
             break
             ;;
         *)
