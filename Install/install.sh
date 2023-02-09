@@ -13,6 +13,7 @@ export https_proxy=${proxy}
 export no_proxy=127.0.0.0/8,localhost,10.0.0.0/8,192.168.0.0/16,192.168.14.0/24,.intel.com,100.64.0.0/10,172.16.0.0/12
 EOF
 source ~/.bash_profile
+
 ## Install the build dependencies
 if [[ "$OPERATING_SYSTEM_VERSION"=="Ubuntu" ]]; then
     apt-get update -y
