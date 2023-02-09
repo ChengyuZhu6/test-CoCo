@@ -11,7 +11,7 @@ set -o pipefail
 
 script_dir="$(dirname "$(readlink -f "$0")")"
 project_dir="$(readlink -f ${script_dir}/../..)"
-OPERATOR_VERSION=v0.3.0
+OPERATOR_VERSION=0.3.0
 source "${script_dir}/lib.sh"
 
 # The operator namespace.
