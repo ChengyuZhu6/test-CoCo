@@ -41,6 +41,7 @@ EOF
         dnf update -y
         dnf groupinstall -y "Development Tools" jq
         dnf -y install ansible-core
+        ansible-galaxy collection install community.docker
     fi
 
     curl -OL https://go.dev/dl/go1.19.2.linux-amd64.tar.gz
