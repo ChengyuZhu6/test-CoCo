@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# Copyright Confidential Containers Contributors
+# Copyright (c) 2022 Intel Corporation
 #
 # SPDX-License-Identifier: Apache-2.0
-#
+
 
 set -o errexit
 set -o nounset

@@ -1,25 +1,24 @@
 #!/usr/bin/env bash
-OPERATING_SYSTEM_VERSION="Ubuntu"
-OPERATOR_PATH="https://github.com/confidential-containers/operator.git"
+#
+# Copyright (c) 2022 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
 
+OPERATING_SYSTEM_VERSION="ubuntu"
+OPERATOR_PATH="https://github.com/confidential-containers/operator.git"
+OPERATOR_VERSION="V0.3.0"
 configure_locally() {
     ## Check OS type
-    OPERATING_SYSTEM_VERSION=$(cat /etc/os-release | grep "NAME" | sed -n "1,1p" | cut -d '=' -f2 | cut -d ' ' -f1 | sed 's/\"//g')
+    source /etc/os-release
+    OPERATING_SYSTEM_VERSION=$ID
     echo "OS: $OPERATING_SYSTEM_VERSION"
 
     ## Config proxy
-    proxy=http://child-prc.intel.com:913
-    cat <<EOF | tee -a ~/.bash_profile
-proxy=http://child-prc.intel.com:913
-export http_proxy=${proxy}
-export https_proxy=${proxy}
-export no_proxy=127.0.0.0/8,localhost,10.0.0.0/8,192.168.0.0/16,192.168.14.0/24,.intel.com,100.64.0.0/10,172.16.0.0/12
-EOF
-    source ~/.bash_profile
+    source ~/scripts/private/intel_proxy.conf
 }
 install_dependencies() {
     ## Install the build dependencies
-    if [ "$OPERATING_SYSTEM_VERSION" == "Ubuntu" ]; then
+    if [ "$OPERATING_SYSTEM_VERSION" == "ubuntu" ]; then
         apt-get update -y
         apt-get install -y expect <<ESXU
     6
@@ -54,8 +53,10 @@ EOF
         ansible-galaxy collection install community.docker
     fi
 
-    curl -OL https://go.dev/dl/go1.19.2.linux-amd64.tar.gz
-    tar -xzf go1.19.2.linux-amd64.tar.gz -C /usr/local/
+    if [ ! -f go1.19.2.linux-amd64.tar.gz ]; then
+        curl -OL https://go.dev/dl/go1.19.2.linux-amd64.tar.gz
+        tar -xzf go1.19.2.linux-amd64.tar.gz -C /usr/local/
+    fi
     GOROOT=/usr/local/go
     cat <<EOF | tee -a ~/.bash_profile
 export GOROOT=/usr/local/go
@@ -68,11 +69,16 @@ EOF
 }
 clone_operator() {
     if [ ! -d $GOPATH/src/github.com/operator ]; then
-        git clone $OPERATOR_PATH $GOPATH/src/github.com/operator
+        git clone $OPERATOR_PATH $GOPATH/src/github.com/operator --depth 1 --branch v0.3.0
     fi
 }
 # Bootstrap the local machine
 bootstrap_local() {
+    if [ $# -gt 0 ]; then
+
+        OPERATOR_VERSION=$1
+    fi
+
     configure_locally
     install_dependencies
     ## Set service proxy
@@ -88,9 +94,9 @@ docker
 
         cat <<EOF | tee "${service_dir}/proxy.conf"
 [Service]
-Environment="HTTP_PROXY=http://child-prc.intel.com:913"
-Environment="HTTPS_PROXY=http://child-prc.intel.com:913"
-Environment="NO_PROXY=127.0.0.0/8,localhost,10.0.0.0/8,192.168.0.0/16,192.168.14.0/24,.intel.com,100.64.0.0/10,172.16.0.0/12"
+Environment="HTTP_PROXY=${http_proxy}"
+Environment="HTTPS_PROXY=${https_proxy}"
+Environment="NO_PROXY=${no_proxy}"
 EOF
     done
     systemctl daemon-reload
