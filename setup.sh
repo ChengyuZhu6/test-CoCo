@@ -39,6 +39,27 @@ EOF
         fi
     else
         dnf update -y
+        if [ $(ls -l /lib/modules | wc -l) -eq 0 ]; then
+            CENTOS_KERNEL_VERSION=$(uname -r)
+            version=${CENTOS_KERNEL_VERSION%%-*}
+            cat <<EOF | tee -a kernel_install.sh
+wget --no-check-certificate https://dl.lamp.sh/kernel/el8/kernel-ml-${version}-1.el8.elrepo.x86_64.rpm
+wget --no-check-certificate https://dl.lamp.sh/kernel/el8/kernel-ml-headers-${version}-1.el8.elrepo.x86_64.rpm
+wget --no-check-certificate https://dl.lamp.sh/kernel/el8/kernel-ml-core-${version}-1.el8.elrepo.x86_64.rpm
+wget --no-check-certificate https://dl.lamp.sh/kernel/el8/kernel-ml-devel-${version}-1.el8.elrepo.x86_64.rpm 
+wget --no-check-certificate https://dl.lamp.sh/kernel/el8/kernel-ml-modules-${version}-1.el8.elrepo.x86_64.rpm
+wget --no-check-certificate https://dl.lamp.sh/kernel/el8/kernel-ml-modules-extra-${version}-1.el8.elrepo.x86_64.rpm
+yum localinstall kernel-ml-* --allowerasing -y
+rm -f kernel-ml-*
+EOF
+            chmod +x kernel_install.sh
+            ./kernel_install.sh
+            rm kernel_install.sh
+        fi
+        if [ ! -f /etc/fstab]; then
+            cat <<EOF | tee -a /etc/fstab
+EOF
+        fi
         dnf groupinstall -y "Development Tools" jq
         dnf -y install ansible-core
         ansible-galaxy collection install community.docker
@@ -54,6 +75,7 @@ export PATH=$PATH:$GOROOT/bin
 EOF
     source ~/.bash_profile
     go version
+    rm go1.19.2.linux-amd64.tar.gz
 }
 clone_operator() {
     if [ ! -d $GOPATH/src/github.com/operator ]; then
