@@ -19,7 +19,7 @@ EOF
 }
 install_dependencies() {
     ## Install the build dependencies
-    if [[ "$OPERATING_SYSTEM_VERSION"=="Ubuntu" ]]; then
+    if [ "$OPERATING_SYSTEM_VERSION" == "Ubuntu" ]; then
         apt-get update -y
         apt-get install -y expect <<ESXU
     6
@@ -39,8 +39,7 @@ EOF
         fi
     else
         dnf update -y
-        dnf groupinstall -y "Development Tools"
-        dnf -y install git curl jq
+        dnf groupinstall -y "Development Tools" jq
         dnf -y install ansible-core
     fi
 
