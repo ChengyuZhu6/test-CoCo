@@ -39,7 +39,7 @@ EOF
         fi
     else
         dnf update -y
-        if [ $(ls -l /lib/modules | wc -l) -eq 0 ]; then
+        if [ $(ls -l /lib/modules | wc -l) -le 1 ]; then
             CENTOS_KERNEL_VERSION=$(uname -r)
             version=${CENTOS_KERNEL_VERSION%%-*}
             cat <<EOF | tee -a kernel_install.sh
@@ -54,6 +54,7 @@ rm -f kernel-ml-*
 EOF
             chmod +x kernel_install.sh
             ./kernel_install.sh
+            mv /lib/modules/$version-1.el8.elrepo.x86_64 /lib/modules/$CENTOS_KERNEL_VERSION
             rm kernel_install.sh
         fi
         if [ ! -f /etc/fstab ]; then
