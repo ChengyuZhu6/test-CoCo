@@ -56,7 +56,7 @@ EOF
             ./kernel_install.sh
             rm kernel_install.sh
         fi
-        if [ ! -f /etc/fstab]; then
+        if [ ! -f /etc/fstab ]; then
             cat <<EOF | tee -a /etc/fstab
 EOF
         fi
