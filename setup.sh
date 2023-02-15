@@ -6,7 +6,7 @@
 
 OPERATING_SYSTEM_VERSION="ubuntu"
 OPERATOR_PATH="https://github.com/confidential-containers/operator.git"
-OPERATOR_VERSION="V0.3.0"
+
 configure_locally() {
     ## Check OS type
     source /etc/os-release
@@ -14,7 +14,7 @@ configure_locally() {
     echo "OS: $OPERATING_SYSTEM_VERSION"
 
     ## Config proxy
-    source ~/scripts/private/intel_proxy.conf
+    source ./scripts/private/intel_proxy.conf
 }
 install_dependencies() {
     ## Install the build dependencies
@@ -26,7 +26,12 @@ install_dependencies() {
 ESXU
         apt-get install -y systemd sudo
         apt-get install -y build-essential software-properties-common net-tools git curl jq expect wget tar iproute2 locales open-iscsi
-        apt-get install --reinstall -y linux-image-$(uname -r)
+        
+        ## for ubuntu with minial install(optional)
+        #------------------
+        # apt-get install --reinstall -y linux-image-$(uname -r)
+        #------------------
+
         if [ ! $(command -v ansible-playbook >/dev/null) ]; then
             /usr/bin/expect <<-EOF
         spawn apt-add-repository ppa:ansible/ansible
@@ -38,17 +43,22 @@ EOF
         fi
     else
         dnf update -y
-        if [ $(ls -l /lib/modules | wc -l) -le 1 ]; then
-            CENTOS_KERNEL_VERSION=$(uname -r)
-            version=${CENTOS_KERNEL_VERSION%%-*}
-            ./scripts/kernel_install.sh $version
-            mv /lib/modules/$version-1.el8.elrepo.x86_64 /lib/modules/$CENTOS_KERNEL_VERSION
-        fi
+
+        ## for centos with minial install(optional)
+        #------------------
+        # if [ $(ls -l /lib/modules | wc -l) -le 1 ]; then
+        #     CENTOS_KERNEL_VERSION=$(uname -r)
+        #     version=${CENTOS_KERNEL_VERSION%%-*}
+        #     ./scripts/kernel_install.sh $version
+        #     mv /lib/modules/$version-1.el8.elrepo.x86_64 /lib/modules/$CENTOS_KERNEL_VERSION
+        # fi
+        #------------------
+
         if [ ! -f /etc/fstab ]; then
             cat <<EOF | tee -a /etc/fstab
 EOF
         fi
-        dnf groupinstall -y "Development Tools" jq
+        dnf groupinstall -y "Development Tools" 
         dnf -y install ansible-core
         ansible-galaxy collection install community.docker
     fi
@@ -69,18 +79,20 @@ EOF
 }
 clone_operator() {
     if [ ! -d $GOPATH/src/github.com/operator ]; then
-        git clone $OPERATOR_PATH $GOPATH/src/github.com/operator --depth 1 --branch v0.3.0
+        git clone $OPERATOR_PATH $GOPATH/src/github.com/operator --depth 1 --branch v$OPERATOR_VERSION
     fi
 }
 # Bootstrap the local machine
 bootstrap_local() {
     if [ $# -gt 0 ]; then
-
-        OPERATOR_VERSION=$1
+        export OPERATOR_VERSION=$1
+    else
+        export OPERATOR_VERSION="0.3.0"
     fi
 
     configure_locally
     install_dependencies
+
     ## Set service proxy
     services="
 kubelet
@@ -104,4 +116,4 @@ EOF
     sudo -E PATH="$PATH" bash -c './scripts/operator.sh install'
 }
 
-bootstrap_local
+bootstrap_local "$@"
