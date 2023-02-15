@@ -59,7 +59,7 @@ EOF
 EOF
         fi
         dnf groupinstall -y "Development Tools" 
-        dnf -y install ansible-core
+        dnf -y install ansible-core tar
         ansible-galaxy collection install community.docker
     fi
 
