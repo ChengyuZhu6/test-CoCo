@@ -16,7 +16,7 @@
 	skopeo --insecure-policy copy --sign-passphrase-file ${test_coco_path}/../signed/passwd.txt --sign-by $GPG_EMAIL docker://$REGISTRTYIMAGE:latest  docker://$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed
 	setup_skopeo_signature_files_in_guest $IMAGE
 	rtcs=$RUNTIMECLASSNAME
-	if [ "${rtcs##*-}" == "tdx" ]; then 
+	if [ $(echo ${RUNTIMECLASSNAME} | grep tdx | wc -l) -le 0 ]; then
 		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$(hostname -I | awk '{print $1}'):50000"
 	else
 		setup_offline_signed_files_in_guest

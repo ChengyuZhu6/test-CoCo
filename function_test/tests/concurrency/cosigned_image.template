@@ -7,7 +7,7 @@
 	remove_kernel_param "agent.enable_signature_verification"
 	remove_kernel_param "agent.aa_kbc_params"
 	rtcs=$RUNTIMECLASSNAME
-	if [ "${rtcs##*-}" == "tdx" ]; then 
+	if [ $(echo ${RUNTIMECLASSNAME} | grep tdx | wc -l) -le 0 ]; then
 		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$IPAddress:50000"
 	else
 		add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"

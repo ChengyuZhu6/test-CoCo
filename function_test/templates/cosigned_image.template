@@ -10,8 +10,8 @@
 	set_key_value "default_memory" "2048" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
 	set_key_value "default_vcpus" "2" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
 	#sizes=$($IMAGE| sed 's/[^0-9 ]//g')
-	set_key_value "default_memory" "16384" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
-	if [ "${rtcs##*-}" == "tdx" ]; then 
+	set_key_value "default_memory" "49152" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	if [ $(echo ${RUNTIMECLASSNAME} | grep tdx | wc -l) -le 0 ]; then
 		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$IPAddress:50000"
 	else
 		add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
