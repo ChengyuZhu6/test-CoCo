@@ -77,13 +77,13 @@ parse_args() {
 		i)
 			echo "-i runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
-			run_operator_install
+			# run_operator_install
 			run_unencrypted_unsigned_image_config
 			run_encrypted_image_config
 			run_offline_encrypted_image_config
 			run_signed_image_config
 			run_cosigned_image_config
-			run_operator_uninstall
+			# run_operator_uninstall
 			;;
 		o)
 			echo "-o runtime: $OPTARG "
@@ -99,11 +99,11 @@ parse_args() {
 		p)
 			echo "-p runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
-			run_operator_install
+			# run_operator_install
 			run_un_pod_spec_tests_config
 			run_cosign_pod_spec_tests_config
 			run_eaa_kbc_pod_spec_tests_config
-			run_operator_uninstall
+			# run_operator_uninstall
 			;;
 		f)
 			echo "-f runtime: $OPTARG "
@@ -116,13 +116,13 @@ parse_args() {
 			echo "-c runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
 			export IMAGE_LISTS=$(jq -r .file.commentsImageLists[] $TEST_COCO_PATH/../config/test_config.json)
-			run_operator_install
+			# run_operator_install
 			run_concurrency_unencrypted_unsigned_image_config
 			run_concurrency_encrypted_image_config
 			run_concurrency_offline_encrypted_image_config
 			run_concurrency_signed_image_config
 			run_concurrency_cosigned_image_config
-			run_operator_uninstall
+			# run_operator_uninstall
 			;;
 		a)
 			echo "-a runtime: $OPTARG "
