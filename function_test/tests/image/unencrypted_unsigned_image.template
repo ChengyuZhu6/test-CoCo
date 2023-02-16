@@ -5,8 +5,12 @@
 		add_kernel_params "agent.https_proxy=http://child-prc.intel.com:913"
 		add_kernel_params "agent.no_proxy=*.sh.intel.com,10.*"
 		remove_kernel_param "agent.aa_kbc_params"
+		remove_kernel_param "agent.https_proxy"
+		remove_kernel_param "agent.no_proxy"
+		add_kernel_params "agent.enable_signature_verification=false"
+
 		if [ "${rtcs##*-}" == "tdx" ]; then 
-		add_kernel_params "agent.aa_kbc_params=eaa_kbc::$IPAddress:50000"
+			add_kernel_params "agent.aa_kbc_params=eaa_kbc::$IPAddress:50000"
 		else
 			add_kernel_params "agent.aa_kbc_params=offline_fs_kbc::null"
 		fi
