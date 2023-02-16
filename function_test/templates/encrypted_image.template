@@ -14,7 +14,7 @@
 	set_key_value "default_memory" "2048" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
 	set_key_value "default_vcpus" "2" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
 	#sizes=$($IMAGE| sed 's/[^0-9 ]//g')
-	set_key_value "default_memory" "16384" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
+	set_key_value "default_memory" "49152" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
 	generate_encrypted_image $IMAGE
 	echo "$RUNTIMECLASSNAME" >&3
 	
