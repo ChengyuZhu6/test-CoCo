@@ -10,7 +10,7 @@
 	set_key_value "default_vcpus" "1" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
 	set_key_value "default_memory" "2048" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
 	set_key_value "default_vcpus" "2" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
-	sizes=$($IMAGE| sed 's/[^0-9 ]//g')
+	#sizes=$($IMAGE| sed 's/[^0-9 ]//g')
 	set_key_value "default_memory" "16384" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
 	gpg --no-tty --batch -a -o ${test_coco_path}/../signed/pubkey.gpg --export $GPG_EMAIL
 	skopeo --insecure-policy copy --sign-passphrase-file ${test_coco_path}/../signed/passwd.txt --sign-by $GPG_EMAIL docker://$REGISTRTYIMAGE:latest  docker://$(echo $REGISTRTYIMAGE | cut -d "/" -f1)/signed/$IMAGE:signed

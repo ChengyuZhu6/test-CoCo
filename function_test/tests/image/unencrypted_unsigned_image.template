@@ -13,7 +13,7 @@
 		set_key_value "default_vcpus" "1" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
 		set_key_value "default_memory" "2048" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
 		set_key_value "default_vcpus" "2" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
-		sizes=$(echo $IMAGE|sed 's/[^0-9 ]//g')
+		#sizes=$(echo $IMAGE|sed 's/[^0-9 ]//g')
 		set_key_value "default_memory" "16384" "$RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE}"
 		
 		new_vcpus=$(sed -n -e 's#^default_vcpus = \(.*\)#\1#gp' $RUNTIME_CONFIG_PATH/${CURRENT_CONFIG_FILE})
