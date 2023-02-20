@@ -57,16 +57,12 @@ parse_args() {
 		t)
 			echo "-t runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
-			run_operator_uninstall
 			;;
 		n) ;;
 
 		b)
 			echo "-b runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
-			run_operator_install_measured_boot
-			run_measured_boot_image_config
-			run_operator_uninstall
 			;;
 		m)
 			echo "-m runtime: $OPTARG "
@@ -77,19 +73,16 @@ parse_args() {
 		i)
 			echo "-i runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
-			run_operator_install
+			move_certs_to_rootfs
 			run_unencrypted_unsigned_image_config
 			run_encrypted_image_config
 			run_offline_encrypted_image_config
 			run_signed_image_config
 			run_cosigned_image_config
-			run_operator_uninstall
 			;;
 		o)
 			echo "-o runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
-			run_operator_install
-			# run_operator_uninstall
 			;;
 		d)
 			echo "-d runtime: $OPTARG "
@@ -99,45 +92,29 @@ parse_args() {
 		p)
 			echo "-p runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
-			run_operator_install
+			move_certs_to_rootfs
 			run_un_pod_spec_tests_config
 			run_cosign_pod_spec_tests_config
 			run_eaa_kbc_pod_spec_tests_config
-			run_operator_uninstall
 			;;
 		f)
 			echo "-f runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
-			run_operator_install_measured_boot
 			run_function_tests_config
-			run_operator_uninstall
 			;;
 		c)
 			echo "-c runtime: $OPTARG "
 			set_runtimeclass_config $OPTARG
+			move_certs_to_rootfs
 			export IMAGE_LISTS=$(jq -r .file.commentsImageLists[] $TEST_COCO_PATH/../config/test_config.json)
-			run_operator_install
 			run_concurrency_unencrypted_unsigned_image_config
 			run_concurrency_encrypted_image_config
 			run_concurrency_offline_encrypted_image_config
 			run_concurrency_signed_image_config
 			run_concurrency_cosigned_image_config
-			run_operator_uninstall
 			;;
 		a)
 			echo "-a runtime: $OPTARG "
-			run_operator_install_measured_boot
-			set_runtimeclass_config $OPTARG
-			run_measured_boot_image_config
-			move_certs_to_rootfs
-			run_auth_registry_image_config
-			run_multiple_pod_spec_and_images_config
-			run_encrypted_image_config
-			run_offline_encrypted_image_config
-			run_signed_image_config
-			run_cosigned_image_config
-			run_trust_storage_config
-			run_operator_uninstall
 			;;
 		h) usage 0 ;;
 		*)
@@ -343,7 +320,7 @@ run_signed_image_config() {
 		# docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
-		cat "$(generate_tests_signed_image "$TEST_COCO_PATH/../templates/signed_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+		cat "$(generate_tests_signed_image "$TEST_COCO_PATH/../tests/image/signed_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 		tests_passing+="|${str} ci-$image $image_size $runtimeclass "
 	done
 	echo -e "load ../run/lib.sh \n  \n read_config" | tee -a $new_pod_configs >/dev/null
@@ -369,7 +346,7 @@ run_cosigned_image_config() {
 		# docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
-		cat "$(generate_tests_cosign_image "$TEST_COCO_PATH/../templates/cosigned_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+		cat "$(generate_tests_cosign_image "$TEST_COCO_PATH/../tests/image/cosigned_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 		tests_passing+="|${str} ci-$image $image_size $runtimeclass "
 	done
 	if [ ! -d $TEST_COCO_PATH/../report/image ]; then
@@ -397,7 +374,7 @@ run_encrypted_image_config() {
 		#docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
-		cat "$(generate_tests_encrypted_image "$TEST_COCO_PATH/../templates/encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+		cat "$(generate_tests_encrypted_image "$TEST_COCO_PATH/../tests/image/encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 		tests_passing+="|${str} ci-$image $image_size $runtimeclass "
 	done
 	echo -e "load ../run/lib.sh \n  read_config" | tee -a $new_pod_configs >/dev/null
@@ -423,7 +400,7 @@ run_offline_encrypted_image_config() {
 		#docker pull $image
 		image_size=$(docker image ls | grep ci-$image | head -1 | awk '{print $7}')
 		runtimeclass=$Current_RuntimeClass
-		cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../templates/offline_encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
+		cat "$(generate_tests_offline_encrypted_image "$TEST_COCO_PATH/../tests/image/offline_encrypted_image.template" ci-$image $image_size $runtimeclass)" | tee -a $new_pod_configs >/dev/null
 		tests_passing+="|${str} ci-$image $image_size $runtimeclass "
 	done
 	if [ ! -d $TEST_COCO_PATH/../report/image ]; then
