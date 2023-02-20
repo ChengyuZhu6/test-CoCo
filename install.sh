@@ -17,6 +17,13 @@ configure_locally() {
     ## Config proxy
     source ./scripts/private/intel_proxy.conf
 }
+check_service() {
+    cmd="systemctl status firewalld |"
+    cmd+="egrep -q Active:.*'\<inactive\>'"
+    if ! eval "$cmd"; then
+        systemctl stop firewalld
+    fi
+}
 install_dependencies() {
     ## Install the build dependencies
     if [ "$OPERATING_SYSTEM_VERSION" == "ubuntu" ]; then
@@ -27,7 +34,7 @@ install_dependencies() {
 ESXU
         apt-get install -y systemd sudo
         apt-get install -y build-essential software-properties-common net-tools git curl jq expect wget tar iproute2 locales open-iscsi
-        
+
         ## for ubuntu with minial install(optional)
         #------------------
         # apt-get install --reinstall -y linux-image-$(uname -r)
@@ -59,17 +66,17 @@ EOF
             cat <<EOF | tee -a /etc/fstab
 EOF
         fi
-        dnf groupinstall -y "Development Tools" 
+        dnf groupinstall -y "Development Tools"
         dnf -y install ansible-core tar
         ansible-galaxy collection install community.docker
-        systemctl stop firewalld
+        check_service
     fi
 
     if [ ! -f go1.19.2.linux-amd64.tar.gz ]; then
         curl -OL https://go.dev/dl/go1.19.2.linux-amd64.tar.gz
         tar -xzf go1.19.2.linux-amd64.tar.gz -C /usr/local/
     fi
-    
+
     go version
     rm go1.19.2.linux-amd64.tar.gz
 }
@@ -107,4 +114,4 @@ EOF
     sudo -E PATH="$PATH" bash -c './scripts/operator.sh install'
 }
 
-bootstrap_local 
+bootstrap_local
