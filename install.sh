@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 script_dir="$(dirname "$(readlink -f "$0")")"
-source $script_dir/scripts/common.sh
+source $script_dir/scripts/common.bash
 OPERATING_SYSTEM_VERSION="ubuntu"
 OPERATOR_PATH="https://github.com/confidential-containers/operator.git"
 
