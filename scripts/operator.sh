@@ -13,6 +13,8 @@ set -o pipefail
 script_dir="$(dirname "$(readlink -f "$0")")"
 project_dir="$(readlink -f ${script_dir}/../..)"
 OPERATOR_INSTALL_PATH="$GOPATH/src/github.com/operator/tests/e2e"
+KATA_TESTS_PATH="https://github.com/kata-containers/tests.git"
+KATA_UNINSTALL_PATH="$GOPATH/src/github.com/kata-containers/tests"
 source "${OPERATOR_INSTALL_PATH}/lib.sh"
 
 # The operator namespace.
@@ -118,8 +120,15 @@ set_env() {
 	export KUBECONFIG=/etc/kubernetes/admin.conf
 
 }
+clone_kata_tests() {
+    if [ ! -d $GOPATH/src/github.com/kata-containers/tests ]; then
+        git clone $KATA_TESTS_PATH $GOPATH/src/github.com/kata-containers/tests --depth 1 --branch CCv0
+    fi
+}
 clean_env() {
 	sudo -E PATH="$PATH" bash -c "$OPERATOR_INSTALL_PATH/cluster/down.sh"
+	clone_kata_tests
+	sudo -E PATH="$PATH" bash -c "$KATA_UNINSTALL_PATH/.ci/clean_up.sh"
 }
 main() {
 	ccruntime_overlay="default"
