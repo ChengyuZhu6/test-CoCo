@@ -62,6 +62,7 @@ EOF
         dnf groupinstall -y "Development Tools" 
         dnf -y install ansible-core tar
         ansible-galaxy collection install community.docker
+        systemctl stop firewalld
     fi
 
     if [ ! -f go1.19.2.linux-amd64.tar.gz ]; then
