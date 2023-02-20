@@ -128,6 +128,7 @@ clone_kata_tests() {
 clean_env() {
 	sudo -E PATH="$PATH" bash -c "$OPERATOR_INSTALL_PATH/cluster/down.sh"
 	clone_kata_tests
+	export tests_repo="${tests_repo:-github.com/kata-containers/tests}"
 	sudo -E PATH="$PATH" bash -c "$KATA_UNINSTALL_PATH/.ci/clean_up.sh"
 }
 main() {
