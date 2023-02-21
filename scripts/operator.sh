@@ -127,6 +127,13 @@ clone_kata_tests() {
 }
 clean_env() {
 	sudo -E PATH="$PATH" bash -c "$OPERATOR_INSTALL_PATH/cluster/down.sh"
+	rm /etc/systemd/system/containerd.service.d/containerd-for-cc-override.conf
+	rm /etc/containerd/config.toml
+	systemctl daemon-reload
+	systemctl restart containerd
+	#---------
+	# remove containerd, docker, go, rust
+	#---------
 	clone_kata_tests
 	export tests_repo="${tests_repo:-github.com/kata-containers/tests}"
 	sudo -E PATH="$PATH" bash -c "$KATA_UNINSTALL_PATH/.ci/clean_up.sh"
