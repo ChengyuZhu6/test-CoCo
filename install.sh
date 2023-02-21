@@ -17,7 +17,7 @@ configure_locally() {
     ## Config proxy
     source ./scripts/private/intel_proxy.conf
 }
-check_service() {
+stop_firewalld() {
     cmd="systemctl status firewalld |"
     cmd+="egrep -q Active:.*'\<inactive\>'"
     if ! eval "$cmd"; then
@@ -69,7 +69,11 @@ EOF
         dnf groupinstall -y "Development Tools"
         dnf -y install ansible-core tar
         ansible-galaxy collection install community.docker
-        check_service
+        ##
+        # Now the process checks the firewall service and stops it if the firewall service is running for cc image pulling in centos8 stream.
+        # TODO open the required ports used by Kubernetes
+        ##
+        stop_firewalld
     fi
 
     if [ ! -f go1.19.2.linux-amd64.tar.gz ]; then
@@ -80,11 +84,7 @@ EOF
     go version
     rm go1.19.2.linux-amd64.tar.gz
 }
-clone_operator() {
-    if [ ! -d $GOPATH/src/github.com/operator ]; then
-        git clone $OPERATOR_PATH $GOPATH/src/github.com/operator --depth 1 --branch v$OPERATOR_VERSION
-    fi
-}
+
 # Bootstrap the local machine
 bootstrap_local() {
 
